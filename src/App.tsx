@@ -21,7 +21,13 @@ function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
 
-        <Route element={<MainLayout />}>
+        <Route
+          element={(
+            <ProtectedRoute>
+              <MainLayout />
+            </ProtectedRoute>
+          )}
+        >
           <Route path="/" element={<SearchPage />} />
           <Route path="/search" element={<SearchPage />} />
           <Route path="/my-bookings" element={<MyBookingsPage />} />

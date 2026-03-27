@@ -4,9 +4,15 @@ import Input from '../../components/ui/Input';
 import Button from '../../components/ui/Button';
 
 const SearchPage = () => {
-  const [filter, setFilter] = useState({ guest: 0, budget: 0 });
+  const [filter, setFilter] = useState({ guest: '', budget: '' });
   const [searched, setSearched] = useState(false);
   const [results, setResults] = useState([]);
+
+  const sanitizeIntegerInput = (value) => {
+    const digitsOnly = String(value).replace(/\D/g, '');
+    if (!digitsOnly) return '';
+    return String(Number.parseInt(digitsOnly, 10));
+  };
 
   // Mock หรือข้อมูลสถานที่
   const allVenues = [
@@ -18,12 +24,8 @@ const SearchPage = () => {
   ];
 
   const handleSearch = () => {
-    let guest = parseInt(filter.guest);
-    let budget = parseInt(filter.budget);
-
-    // ตรวจสอบให้เป็นตัวเลขบวกเท่านั้น
-    guest = guest > 0 ? guest : 0;
-    budget = budget > 0 ? budget : 0;
+    const guest = Number.parseInt(filter.guest || '0', 10) || 0;
+    const budget = Number.parseInt(filter.budget || '0', 10) || 0;
 
     // กรองสถานที่ตามเงื่อนไข
     const filtered = allVenues.filter(venue => {
@@ -37,29 +39,44 @@ const SearchPage = () => {
   };
 
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4">ค้นหาสถานที่จัดงานแต่งงาน</h1>
-      <div className="grid grid-cols-3 gap-4 mb-8">
-        <Input 
-          label="จำนวนแขก" 
-          type="number" 
-          value={filter.guest}
-          onChange={(e) => setFilter({...filter, guest: e.target.value})}
-          min="0"
-          step="1"
-        />
-        <Input 
-          label="งบประมาณไม่เกิน" 
-          type="number" 
-          value={filter.budget}
-          onChange={(e) => setFilter({...filter, budget: e.target.value})}
-          min="0"
-          step="1"
-        />
-        <div className="flex items-end">
-          <Button variant="primary" onClick={handleSearch} className="w-full">ค้นหา</Button>
+    <div className="space-y-8">
+      <section className="im-hero">
+        <div className="im-hero__grain" aria-hidden="true" />
+        <div className="im-hero__content">
+          <p className="im-hero__eyebrow">Wedding Discovery</p>
+          <h1 className="im-hero__title">ค้นหาสถานที่จัดงานที่พอดีกับงบและจำนวนแขก</h1>
+          <p className="im-hero__desc">
+            ระบุจำนวนแขกและงบประมาณเพื่อคัดสถานที่ที่ใช่ที่สุดสำหรับวันสำคัญของคุณ
+          </p>
+
+          <div className="im-hero__search">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <Input
+                label="จำนวนแขก"
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                value={filter.guest}
+                onChange={(e) => setFilter({ ...filter, guest: sanitizeIntegerInput(e.target.value) })}
+                placeholder="เช่น 300"
+              />
+              <Input
+                label="งบประมาณไม่เกิน"
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                value={filter.budget}
+                onChange={(e) => setFilter({ ...filter, budget: sanitizeIntegerInput(e.target.value) })}
+                placeholder="เช่น 150000"
+              />
+              <div className="mb-4">
+                <label className="block text-sm font-semibold text-slate-700 mb-1.5">&nbsp;</label>
+                <Button variant="primary" onClick={handleSearch} className="w-full h-[46px]">ค้นหา</Button>
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
+      </section>
 
       {/* แสดงผลลัพธ์การค้นหา */}
       {searched && (
@@ -67,7 +84,7 @@ const SearchPage = () => {
           <p className="text-blue-800">
             พบสถานที่ {results.length} แห่ง
             {filter.guest > 0 && ` (รับแขกอย่างน้อย ${filter.guest} ท่าน)`}
-            {filter.budget > 0 && ` (ราคาไม่เกิน ฿${filter.budget.toLocaleString()})`}
+            {filter.budget > 0 && ` (ราคาไม่เกิน ฿${Number(filter.budget).toLocaleString()})`}
           </p>
         </div>
       )}

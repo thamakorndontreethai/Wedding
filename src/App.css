@@ -53,3 +53,71 @@ td {
   border-bottom: 1px solid #e5e7eb;
   font-size: 0.875rem;
 }
+
+/* Hero style inspired by impeccable.style direction */
+.im-hero {
+  position: relative;
+  overflow: hidden;
+  border-radius: 20px;
+  border: 1px solid #d4d4d4;
+  background: radial-gradient(circle at 18% 20%, #fdecc8 0%, #f9f7f0 35%, #f3f1ea 100%);
+  box-shadow: 0 20px 50px -35px rgba(20, 20, 20, 0.45);
+}
+
+.im-hero__grain {
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(rgba(20, 20, 20, 0.08) 0.4px, transparent 0.4px);
+  background-size: 3px 3px;
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+.im-hero__content {
+  position: relative;
+  padding: 2.25rem;
+}
+
+.im-hero__eyebrow {
+  margin: 0;
+  font-size: 0.75rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #6b5a3f;
+  font-weight: 600;
+}
+
+.im-hero__title {
+  margin: 0.4rem 0 0;
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 4vw, 3.25rem);
+  line-height: 1.02;
+  color: #1f1d1a;
+  letter-spacing: -0.02em;
+}
+
+.im-hero__desc {
+  margin: 0.9rem 0 0;
+  max-width: 62ch;
+  color: #4b5563;
+  font-size: 1rem;
+}
+
+.im-hero__search {
+  margin-top: 1.25rem;
+  border: 1px solid rgba(31, 29, 26, 0.14);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.76);
+  backdrop-filter: blur(2px);
+  padding: 1rem;
+}
+
+@media (max-width: 768px) {
+  .im-hero__content {
+    padding: 1.25rem;
+  }
+
+  .im-hero__search {
+    padding: 0.8rem;
+  }
+}

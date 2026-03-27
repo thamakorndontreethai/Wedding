@@ -32,10 +32,10 @@ const Sidebar = () => {
   const userMenu = menus[user?.role] || [];
 
   return (
-    <aside className="w-64 bg-slate-900 text-white min-h-screen p-4 flex flex-col">
+    <aside className="w-64 bg-gradient-to-b from-stone-900 via-stone-900 to-[#1f1a17] text-stone-100 min-h-screen p-4 flex flex-col border-r border-amber-800/30">
       <div className="mb-10 p-2 text-center">
-        <h2 className="text-xl font-bold text-pink-500">Wedding Planner</h2>
-        <p className="text-xs text-slate-400">KU Sriracha Project</p>
+        <h2 className="text-xl font-bold text-amber-300">Wedding Planner</h2>
+        <p className="text-xs text-stone-400">KU Sriracha Project</p>
       </div>
 
       <nav className="flex-1">
@@ -46,8 +46,8 @@ const Sidebar = () => {
                 to={item.path}
                 className={`block p-3 rounded-lg transition-all ${
                   location.pathname === item.path 
-                  ? 'bg-pink-600 text-white' 
-                  : 'hover:bg-slate-800 text-slate-300'
+                  ? 'bg-gradient-to-r from-rose-200 to-amber-200 text-stone-900 border border-rose-300/80 hover:from-rose-300 hover:to-amber-300 hover:-translate-y-0.5 focus-visible:ring-rose-300' 
+                  : 'hover:bg-stone-800 text-stone-300'
                 }`}
               >
                 {item.name}
@@ -57,12 +57,12 @@ const Sidebar = () => {
         </ul>
       </nav>
 
-      <div className="mt-auto p-4 border-t border-slate-800">
-        <p className="text-xs text-slate-500 mb-2">Logged in as:</p>
+      <div className="mt-auto p-4 border-t border-stone-700/60">
+        <p className="text-xs text-stone-500 mb-2">Logged in as:</p>
         <p className="text-sm font-medium truncate">{user?.name} ({user?.role})</p>
         <button
           onClick={handleLogout}
-          className="text-xs text-red-400 hover:text-red-300 mt-2"
+          className="text-xs text-rose-400 hover:text-rose-300 mt-2"
         >
           ออกจากระบบ
         </button>

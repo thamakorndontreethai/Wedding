@@ -4,7 +4,6 @@ import Badge from '../../components/ui/Badge';
 const MyBookingsPage = () => {
 	const bookings = [
 		['BK-6901', 'Grand Ballroom KU Sriracha', '14 ก.พ. 69', <Badge status="processing" />],
-		['BK-6902', 'Garden Wedding Suite', '20 มี.ค. 69', <Badge status="pending" />],
 	];
 
 	return (

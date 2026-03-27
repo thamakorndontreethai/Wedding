@@ -1,13 +1,26 @@
 const Badge = ({ status }) => {
+  const normalized = String(status || '').toLowerCase();
   const styles = {
-    pending: "bg-yellow-100 text-yellow-800",
-    verified: "bg-green-100 text-green-800",
-    rejected: "bg-red-100 text-red-800",
-    processing: "bg-blue-100 text-blue-800"
+    pending: 'bg-amber-50 text-amber-700 ring-amber-200',
+    verified: 'bg-emerald-50 text-emerald-700 ring-emerald-200',
+    approved: 'bg-emerald-50 text-emerald-700 ring-emerald-200',
+    rejected: 'bg-rose-50 text-rose-700 ring-rose-200',
+    processing: 'bg-sky-50 text-sky-700 ring-sky-200',
   };
+
+  const labels = {
+    pending: 'Pending',
+    verified: 'Verified',
+    approved: 'Approved',
+    rejected: 'Rejected',
+    processing: 'Processing',
+  };
+
   return (
-    <span className={`px-2 py-1 rounded-full text-xs font-medium ${styles[status] || "bg-gray-100"}`}>
-      {status.toUpperCase()}
+    <span
+      className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ring-1 ring-inset ${styles[normalized] || 'bg-slate-100 text-slate-700 ring-slate-200'}`}
+    >
+      {labels[normalized] || normalized || 'Unknown'}
     </span>
   );
 };

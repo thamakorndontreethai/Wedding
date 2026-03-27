@@ -3,8 +3,8 @@ import Badge from '../../components/ui/Badge';
 
 const OrderPage = () => {
   const orders = [
-    ['ORD-6901', 'คุณนิติภูมิ - คุณสิรวิชญ์', '14 ก.พ. 69', <Badge status="processing" />],
-    ['ORD-6905', 'คุณธมกร - คุณสมศรี', '20 มี.ค. 69', <Badge status="pending" />]
+    ['ORD-6901', 'คุณนิติภูมิ - คุณธมกร', '29 ก.พ. 69', <Badge status="processing" />],
+    ['ORD-6905', 'คุณสิรวิชญ์ - คุณสมศรี', '30 มี.ค. 69', <Badge status="pending" />]
   ];
 
   return (
