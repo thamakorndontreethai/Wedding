@@ -2,7 +2,7 @@ import express from 'express'
 import { register, login, getMe } from '../controllers/authController.js'
 import { createBooking, getMyBookings, getAllBookings } from '../controllers/bookingController.js'
 import { submitPayment, verifyPayment, getPendingPayments } from '../controllers/paymentController.js'
-import { getVenues, updateVenueAvailability, getPackages, createPackage, updatePackage, getRevenueReport, getSummary } from '../controllers/venueController.js'
+import { getVenues, updateVenueAvailability, getPackages, createPackage, updatePackage, getRevenueReport, getSummary } from '../controllers/venueComtroller.js'
 import { protect, authorize } from '../middleware/auth.js'
 import { upload } from '../config/cloudinary.js'
 

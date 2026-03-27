@@ -1,437 +1,55 @@
-/* ─────────────────────────────────────────────
-   Design Tokens
-   Colors : OKLCH  (perceptually uniform)
-   Spacing: Modular Scale ×1.333 (Perfect Fourth)
-   Base   : 1rem = 16px
-   Scale  : .422 .563 .75 1 1.333 1.777 2.369 3.157 4.209rem
-───────────────────────────────────────────── */
+/* จัดการ Layout หลักของแอป */
+.app-container {
+  display: flex;
+  min-height: 100vh;
+  background-color: #f9fafb; /* gray-50 */
+}
 
+/* ส่วนของเนื้อหาหลักที่อยู่ข้าง Sidebar */
+.main-content {
+  flex: 1;
+  padding: 2rem;
+  overflow-y: auto;
+}
+
+/* ตกแต่งสีสันธีมงานแต่งงาน (Primary Color) */
 :root {
-  /* ── OKLCH Palette ── */
-  --ink:          oklch(14%  0.018 265);
-  --ink-muted:    oklch(44%  0.018 265);
-  --ink-ghost:    oklch(62%  0.012 265);
-  --surface:      oklch(98%  0.004  90);
-  --surface-dim:  oklch(94%  0.006  90);
-  --surface-rule: oklch(88%  0.008  90);
-
-  --accent:       oklch(55%  0.22  148);   /* vivid green   */
-  --accent-dim:   oklch(94%  0.06  148);
-  --accent-deep:  oklch(36%  0.14  148);
-
-  --warm:         oklch(80%  0.16   85);   /* amber mark    */
-  --link:         oklch(50%  0.18  250);   /* slate blue    */
-  --link-hover:   oklch(35%  0.18  250);
-
-  /* ── Modular Scale ── */
-  --s-3xs: 0.422rem;
-  --s-2xs: 0.563rem;
-  --s-xs:  0.75rem;
-  --s-sm:  1rem;
-  --s-md:  1.333rem;
-  --s-lg:  1.777rem;
-  --s-xl:  2.369rem;
-  --s-2xl: 3.157rem;
-  --s-3xl: 4.209rem;
-
-  /* ── Typography ── */
-  --font-serif: "Georgia", "Times New Roman", serif;
-  --font-mono:  "JetBrains Mono", "Fira Code", "Cascadia Code", ui-monospace, monospace;
-  --font-sans:  system-ui, -apple-system, "Segoe UI", sans-serif;
-
-  /* ── Shared ── */
-  --rule:   1px solid var(--surface-rule);
-  --border: 1.5px solid oklch(60% 0.01 265 / 0.25);
-  --ease:   cubic-bezier(0.16, 1, 0.3, 1);
+  --primary-color: #db2777; /* pink-600 */
+  --primary-hover: #be185d; /* pink-700 */
+  --secondary-color: #6b7280; /* gray-500 */
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --ink:          oklch(95%  0.006  90);
-    --ink-muted:    oklch(65%  0.012 265);
-    --ink-ghost:    oklch(44%  0.012 265);
-    --surface:      oklch(13%  0.012 265);
-    --surface-dim:  oklch(18%  0.012 265);
-    --surface-rule: oklch(25%  0.012 265);
-
-    --accent:       oklch(70%  0.22  148);
-    --accent-dim:   oklch(20%  0.08  148);
-    --accent-deep:  oklch(88%  0.16  148);
-
-    --warm:         oklch(78%  0.16   85);
-    --link:         oklch(70%  0.16  250);
-    --link-hover:   oklch(86%  0.14  250);
-
-    --border: 1.5px solid oklch(55% 0.01 265 / 0.22);
-  }
+/* ปรับแต่งฟอร์ม Login/Register ให้ดูนุ่มนวล */
+.auth-card {
+  background: white;
+  padding: 2.5rem;
+  border-radius: 1rem;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 450px;
 }
 
-/* ─── Reset ─── */
-*, *::before, *::after { box-sizing: border-box; }
-
-body {
-  font-family: var(--font-sans);
-  font-size:   var(--s-sm);
-  line-height: 1.6;
-  background:  var(--surface);
-  color:       var(--ink);
-  min-height:  100dvh;
+/* Transition สำหรับปุ่ม */
+button {
+  transition: all 0.2s ease-in-out;
 }
 
-
-/* ════════════════════════════════════════════
-   COUNTER BUTTON
-════════════════════════════════════════════ */
-.counter {
-  font-family:    var(--font-mono);
-  font-size:      var(--s-xs);
-  font-weight:    600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color:          var(--ink);
-  background:     var(--surface);
-  border:         var(--border);
-  border-radius:  3px;
-  padding:        var(--s-xs) var(--s-md);
-  cursor:         pointer;
-  position:       relative;
-  overflow:       hidden;
-  margin-bottom:  var(--s-xl);
-  transition:
-    color         200ms var(--ease),
-    border-color  200ms var(--ease),
-    transform      80ms var(--ease);
-
-  /* Animated left-edge accent bar */
-  &::before {
-    content:              '';
-    position:             absolute;
-    inset-block:          0;
-    inset-inline-start:   0;
-    width:                3px;
-    background:           var(--accent);
-    border-radius:        0 2px 2px 0;
-    transform:            scaleY(0);
-    transform-origin:     bottom center;
-    transition:           transform 220ms var(--ease);
-  }
-
-  &:hover {
-    border-color: var(--accent);
-    color:        var(--accent-deep);
-    &::before { transform: scaleY(1); }
-  }
-
-  &:active { transform: scale(0.97); }
-
-  &:focus-visible {
-    outline:        2px solid var(--accent);
-    outline-offset: 3px;
-  }
+/* ปรับแต่ง Table ให้ Scannable */
+table {
+  width: 100%;
+  border-collapse: collapse;
 }
 
-
-/* ════════════════════════════════════════════
-   HERO LOGO CLUSTER
-════════════════════════════════════════════ */
-.hero {
-  position: relative;
-
-  .base,
-  .framework,
-  .vite {
-    inset-inline: 0;
-    margin: 0 auto;
-  }
-
-  .base {
-    width:    170px;
-    position: relative;
-    z-index:  0;
-    filter:   drop-shadow(0 10px 24px oklch(80% 0.16 85 / 0.16));
-  }
-
-  .framework,
-  .vite {
-    position: absolute;
-  }
-
-  .framework {
-    z-index:   1;
-    top:       34px;
-    height:    28px;
-    transform: perspective(2000px) rotateZ(300deg) rotateX(44deg) rotateY(39deg) scale(1.4);
-  }
-
-  .vite {
-    z-index:   0;
-    top:       107px;
-    height:    26px;
-    width:     auto;
-    transform: perspective(2000px) rotateZ(300deg) rotateX(40deg) rotateY(39deg) scale(0.8);
-  }
-}
-
-
-/* ════════════════════════════════════════════
-   CENTER / HERO SECTION
-════════════════════════════════════════════ */
-#center {
-  display:        flex;
-  flex-direction: column;
-  gap:            var(--s-xl);
-  place-content:  center;
-  place-items:    center;
-  flex-grow:      1;
-  text-align:     center;
-  padding:        var(--s-2xl) var(--s-md);
-  position:       relative;
-
-  /* Dot-grid texture */
-  &::before {
-    content:    '';
-    position:   absolute;
-    inset:      0;
-    background-image: radial-gradient(
-      circle,
-      oklch(55% 0.22 148 / 0.055) 1px,
-      transparent 1px
-    );
-    background-size: var(--s-lg) var(--s-lg);
-    pointer-events: none;
-  }
-
-  h1 {
-    font-family:    var(--font-serif);
-    font-size:      var(--s-2xl);
-    font-weight:    400;
-    letter-spacing: -0.02em;
-    line-height:    1.1;
-    color:          var(--ink);
-
-    /* Amber underline on "Get" (first word) */
-    background:
-      linear-gradient(var(--warm), var(--warm)) no-repeat
-      0 100% / 3ch 3px;
-    padding-bottom: var(--s-2xs);
-  }
-
-  p {
-    font-size:   var(--s-sm);
-    color:       var(--ink-muted);
-    max-width:   36ch;
-    line-height: 1.55;
-  }
-
-  code {
-    font-family:    var(--font-mono);
-    font-size:      0.875em;
-    background:     var(--surface-dim);
-    border:         var(--rule);
-    border-radius:  3px;
-    padding:        0.1em 0.4em;
-    color:          var(--accent-deep);
-    letter-spacing: 0.02em;
-  }
-
-  @media (max-width: 1024px) {
-    padding: var(--s-xl) var(--s-md) var(--s-lg);
-    gap:     var(--s-lg);
-    h1 { font-size: var(--s-xl); }
-  }
-}
-
-
-/* ════════════════════════════════════════════
-   TICKS DIVIDER
-════════════════════════════════════════════ */
-.ticks {
-  position:   relative;
-  width:      100%;
-  border-top: var(--rule);
-
-  &::before,
-  &::after {
-    content:  '';
-    position: absolute;
-    top:      -5px;
-    border:   5px solid transparent;
-  }
-
-  &::before {
-    left:              var(--s-lg);
-    border-left-color: var(--accent);
-  }
-
-  &::after {
-    right:              var(--s-lg);
-    border-right-color: var(--accent);
-  }
-}
-
-
-/* ════════════════════════════════════════════
-   NEXT STEPS
-════════════════════════════════════════════ */
-#next-steps {
-  display:    flex;
-  border-top: var(--rule);
+th {
   text-align: left;
-
-  & > div {
-    flex:    1 1 0;
-    padding: var(--s-xl) var(--s-2xl);
-
-    @media (max-width: 1024px) {
-      padding: var(--s-lg) var(--s-md);
-    }
-  }
-
-  .icon {
-    margin-bottom: var(--s-md);
-    width:  22px;
-    height: 22px;
-    color:  var(--accent);
-  }
-
-  h2 {
-    font-family:    var(--font-serif);
-    font-size:      var(--s-lg);
-    font-weight:    400;
-    letter-spacing: -0.01em;
-    color:          var(--ink);
-    margin-bottom:  var(--s-2xs);
-    line-height:    1.2;
-  }
-
-  p {
-    font-size: var(--s-sm);
-    color:     var(--ink-muted);
-  }
-
-  @media (max-width: 1024px) {
-    flex-direction: column;
-    text-align:     center;
-  }
+  padding: 0.75rem 1.5rem;
+  background-color: #f3f4f6;
+  font-weight: 600;
+  font-size: 0.875rem;
 }
 
-
-/* ─── Docs column accent bar ─── */
-#docs {
-  border-right: var(--rule);
-  position:     relative;
-
-  &::after {
-    content:              '';
-    position:             absolute;
-    top:                  var(--s-xl);
-    inset-inline-start:   0;
-    width:                3px;
-    height:               var(--s-xl);
-    background:           var(--accent);
-    border-radius:        0 3px 3px 0;
-  }
-
-  @media (max-width: 1024px) {
-    border-right:  none;
-    border-bottom: var(--rule);
-    &::after { display: none; }
-  }
-}
-
-
-/* ════════════════════════════════════════════
-   LINK LIST
-════════════════════════════════════════════ */
-#next-steps ul {
-  list-style: none;
-  padding:    0;
-  display:    flex;
-  gap:        var(--s-xs);
-  margin:     var(--s-lg) 0 0;
-
-  .logo {
-    height: 16px;
-    width:  auto;
-  }
-
-  a {
-    display:         inline-flex;
-    align-items:     center;
-    gap:             var(--s-xs);
-    font-family:     var(--font-mono);
-    font-size:       var(--s-2xs);
-    font-weight:     600;
-    letter-spacing:  0.06em;
-    text-transform:  uppercase;
-    text-decoration: none;
-    color:           var(--ink);
-    background:      var(--surface-dim);
-    border:          var(--rule);
-    border-radius:   3px;
-    padding:         var(--s-xs) var(--s-sm);
-    transition:
-      color        150ms var(--ease),
-      background   150ms var(--ease),
-      border-color 150ms var(--ease),
-      transform    100ms var(--ease);
-
-    &:hover {
-      color:        var(--link-hover);
-      background:   var(--surface);
-      border-color: oklch(from var(--link) l c h / 0.4);
-      transform:    translateY(-1px);
-    }
-
-    &:active { transform: translateY(0); }
-
-    .button-icon {
-      height:      14px;
-      width:       14px;
-      flex-shrink: 0;
-      opacity:     0.7;
-    }
-  }
-
-  @media (max-width: 1024px) {
-    margin-top:      var(--s-md);
-    flex-wrap:       wrap;
-    justify-content: center;
-
-    li { flex: 1 1 calc(50% - var(--s-xs)); }
-
-    a {
-      width:           100%;
-      justify-content: center;
-      box-sizing:      border-box;
-    }
-  }
-}
-
-
-/* ════════════════════════════════════════════
-   SPACER FOOTER
-════════════════════════════════════════════ */
-#spacer {
-  height:     var(--s-3xl);
-  border-top: var(--rule);
-  position:   relative;
-
-  /* Edition watermark — injected via CSS, no HTML needed */
-  &::after {
-    content:             'Vite · React';
-    position:            absolute;
-    inset-block-end:     var(--s-sm);
-    inset-inline-end:    var(--s-lg);
-    font-family:         var(--font-mono);
-    font-size:           var(--s-3xs);
-    letter-spacing:      0.14em;
-    text-transform:      uppercase;
-    color:               var(--ink-ghost);
-  }
-
-  @media (max-width: 1024px) {
-    height:           var(--s-2xl);
-    &::after { inset-inline-end: var(--s-md); }
-  }
+td {
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid #e5e7eb;
+  font-size: 0.875rem;
 }
