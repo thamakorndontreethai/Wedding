@@ -3,10 +3,12 @@ const Venue = require("../models/Venue");
 // GET /api/venues
 exports.getAllVenues = async (req, res) => {
     try {
-        const { guestCount, date } = req.query;
-        let filter = {};
-        if (guestCount) filter["capacity.buffet"] = { $gte: Number(guestCount) };
-        if (date) filter.availableDates = new Date(date);
+        const { guestCount, budget } = req.query;
+        let filter = { isActive: true };
+
+        if (guestCount) filter.capacityBuffet = { $gte: Number(guestCount) };
+        if (budget) filter.pricePerSession = { $lte: Number(budget) };
+
         const venues = await Venue.find(filter);
         res.json(venues);
     } catch (err) {

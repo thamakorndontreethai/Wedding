@@ -1,9 +1,9 @@
-import mongoose from 'mongoose'
+const mongoose = require("mongoose");
 
 const packageSchema = new mongoose.Schema({
     name: { type: String, required: true },
     description: { type: String },
-    venueId: { type: mongoose.Schema.Types.ObjectId, ref: 'Venue', required: true },
+    venueId: { type: mongoose.Schema.Types.ObjectId, ref: "Venue", required: true },
     basePrice: { type: Number, required: true },
     includeFood: { type: Boolean, default: false },
     includeMusic: { type: Boolean, default: false },
@@ -12,6 +12,6 @@ const packageSchema = new mongoose.Schema({
     addonMusicPrice: { type: Number, default: 0 },
     addonPhotoPrice: { type: Number, default: 0 },
     isActive: { type: Boolean, default: true },
-}, { timestamps: true })
+}, { timestamps: true });
 
-export default mongoose.model('Package', packageSchema)
+module.exports = mongoose.model("Package", packageSchema);

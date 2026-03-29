@@ -1,4 +1,4 @@
-import mongoose from 'mongoose'
+const mongoose = require("mongoose");
 
 const venueSchema = new mongoose.Schema({
     name: { type: String, required: true },
@@ -10,6 +10,6 @@ const venueSchema = new mongoose.Schema({
     pricePerSession: { type: Number, required: true },
     images: [{ type: String }],
     isActive: { type: Boolean, default: true },
-}, { timestamps: true })
+}, { timestamps: true });
 
-export default mongoose.model('Venue', venueSchema)
+module.exports = mongoose.model("Venue", venueSchema);

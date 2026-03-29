@@ -1,81 +1,160 @@
-import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
-import api from "../../services/api";
-import useAuthStore from "../../store/authStore";
+import { useState } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+import api from '../../services/api';
+import { useAuthStore } from '../../store/authStore';
 
-export default function RegisterPage() {
+const RegisterPage = () => {
     const navigate = useNavigate();
-    const { setAuth } = useAuthStore();
-
-    const [form, setForm] = useState({
-        username: "", email: "", password: "", phone: "", role: "customers"
+    const { setAuth } = useAuthStore(); // ✅ ย้ายมาอยู่ในนี้
+    const [role, setRole] = useState('customer');
+    const [error, setError] = useState('');
+    const [loading, setLoading] = useState(false);
+    const [formData, setFormData] = useState({
+        firstName: '', lastName: '', phone: '', email: '', password: '',
+        serviceType: 'food',
     });
-    const [error, setError] = useState("");
 
-    const handleChange = (e) =>
-        setForm({ ...form, [e.target.name]: e.target.value });
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        if (name === 'firstName' || name === 'lastName')
+            setFormData(prev => ({ ...prev, [name]: value.replace(/[0-9]/g, '') }));
+        else if (name === 'phone')
+            setFormData(prev => ({ ...prev, phone: value.replace(/\D/g, '').slice(0, 10) }));
+        else
+            setFormData(prev => ({ ...prev, [name]: value }));
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setError("");
+        setError('');
+        setLoading(true);
         try {
-            const endpoint = form.role === "customers"
-                ? "/auth/register/customers"
-                : "/auth/register/provider";
+            const endpoint = role === 'customer'
+                ? '/auth/register/customer'
+                : '/auth/register/provider';
 
-            // แก้จุดที่ 1: ใช้ api (ที่ import มา) แทน axios และใช้ form แทน formData
-            const { data } = await api.post(endpoint, form);
+            const payload = role === 'customer'
+                ? {
+                    username: `${formData.firstName} ${formData.lastName}`,
+                    email: formData.email, password: formData.password, phone: formData.phone
+                }
+                : {
+                    firstName: formData.firstName, lastName: formData.lastName,
+                    email: formData.email, password: formData.password,
+                    phone: formData.phone, serviceType: formData.serviceType
+                };
 
-            setAuth(data.user || data.customers || data.provider, data.token);
-
-            navigate(form.role === "customers" ? "/customers/search" : "/provider/orders");
+            const { data } = await api.post(endpoint, payload);
+            setAuth(data.user, data.token, role);
+            navigate(role === 'customer' ? '/search' : '/provider/dashboard');
         } catch (err) {
-            console.error(err);
-            setError(err.response?.data?.message || "Register failed");
+            setError(err.response?.data?.message || 'สมัครสมาชิกไม่สำเร็จ');
+        } finally {
+            setLoading(false);
         }
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-50">
-            <div className="bg-white p-8 rounded-2xl shadow-md w-full max-w-md">
-                <h2 className="text-2xl font-bold text-center mb-6 text-rose-500">สมัครสมาชิก</h2>
+        <div className="auth-bg">
+            <div className="auth-card" style={{ maxWidth: '520px' }}>
 
-                {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
+                <div className="auth-header">
+                    <div className="auth-icon">🌸</div>
+                    <h1>สร้างบัญชีใหม่</h1>
+                    <p>เลือกประเภทผู้ใช้งานเพื่อเริ่มต้น</p>
+                </div>
 
-                <form onSubmit={handleSubmit} className="space-y-4">
-                    {/* Role */}
-                    <select name="role" value={form.role} onChange={handleChange}
-                        className="w-full border rounded-lg px-4 py-2">
-                        <option value="customers">ลูกค้า (คู่บ่าวสาว)</option>
-                        <option value="provider">ผู้ให้บริการ</option>
-                    </select>
+                <div className="auth-body">
+                    <form onSubmit={handleSubmit}>
 
-                    <input name="username" placeholder="Username" required
-                        value={form.username} onChange={handleChange}
-                        className="w-full border rounded-lg px-4 py-2" />
+                        {/* Role */}
+                        <div className="role-selector" style={{ gridTemplateColumns: '1fr 1fr', marginBottom: '20px' }}>
+                            {[
+                                { value: 'customer', label: '👫 ลูกค้า (คู่บ่าวสาว)' },
+                                { value: 'provider', label: '🎵 ผู้ให้บริการ' },
+                            ].map((r) => (
+                                <button key={r.value} type="button"
+                                    className={`role-btn ${role === r.value ? 'active' : ''}`}
+                                    onClick={() => setRole(r.value)}>
+                                    {r.label}
+                                </button>
+                            ))}
+                        </div>
 
-                    <input name="email" type="email" placeholder="Email" required
-                        value={form.email} onChange={handleChange}
-                        className="w-full border rounded-lg px-4 py-2" />
+                        {/* Name row */}
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                            <div className="input-group">
+                                <label className="input-label">ชื่อ</label>
+                                <div className="input-wrapper">
+                                    <span className="input-icon">👤</span>
+                                    <input className="auth-input" name="firstName" placeholder="ชื่อ"
+                                        value={formData.firstName} onChange={handleChange} required />
+                                </div>
+                            </div>
+                            <div className="input-group">
+                                <label className="input-label">นามสกุล</label>
+                                <div className="input-wrapper">
+                                    <span className="input-icon">👤</span>
+                                    <input className="auth-input" name="lastName" placeholder="นามสกุล"
+                                        value={formData.lastName} onChange={handleChange} required />
+                                </div>
+                            </div>
+                        </div>
 
-                    <input name="password" type="password" placeholder="Password" required
-                        value={form.password} onChange={handleChange}
-                        className="w-full border rounded-lg px-4 py-2" />
+                        <div className="input-group">
+                            <label className="input-label">เบอร์โทร</label>
+                            <div className="input-wrapper">
+                                <span className="input-icon">📱</span>
+                                <input className="auth-input" name="phone" placeholder="0812345678"
+                                    value={formData.phone} onChange={handleChange} inputMode="numeric" />
+                            </div>
+                        </div>
 
-                    <input name="phone" placeholder="เบอร์โทร"
-                        value={form.phone} onChange={handleChange}
-                        className="w-full border rounded-lg px-4 py-2" />
+                        <div className="input-group">
+                            <label className="input-label">อีเมล</label>
+                            <div className="input-wrapper">
+                                <span className="input-icon">✉️</span>
+                                <input className="auth-input" type="email" name="email" placeholder="example@ku.th"
+                                    value={formData.email} onChange={handleChange} required />
+                            </div>
+                        </div>
 
-                    <button type="submit"
-                        className="w-full bg-rose-500 text-white py-2 rounded-lg hover:bg-rose-600">
-                        สมัครสมาชิก
-                    </button>
-                </form>
+                        <div className="input-group">
+                            <label className="input-label">รหัสผ่าน</label>
+                            <div className="input-wrapper">
+                                <span className="input-icon">🔒</span>
+                                <input className="auth-input" type="password" name="password" placeholder="••••••••"
+                                    value={formData.password} onChange={handleChange} required />
+                            </div>
+                        </div>
 
-                <p className="text-center text-sm mt-4">
-                    มีบัญชีแล้ว? <Link to="/login" className="text-rose-500">เข้าสู่ระบบ</Link>
-                </p>
+                        {/* Service type (provider only) */}
+                        {role === 'provider' && (
+                            <div className="input-group">
+                                <label className="input-label">ประเภทบริการ</label>
+                                <select className="auth-input" name="serviceType"
+                                    value={formData.serviceType} onChange={handleChange}
+                                    style={{ paddingLeft: '16px' }}>
+                                    <option value="food">🍽️ อาหาร</option>
+                                    <option value="music">🎵 วงดนตรี</option>
+                                    <option value="photo">📷 ช่างภาพ</option>
+                                </select>
+                            </div>
+                        )}
+
+                        {error && <div className="auth-error">⚠️ {error}</div>}
+
+                        <button className="auth-btn auth-btn-primary" type="submit" disabled={loading}>
+                            {loading ? 'กำลังสมัคร...' : 'ยืนยันการสมัคร'}
+                        </button>
+
+                    </form>
+
+                    <Link to="/login" className="auth-link">← ย้อนกลับไปหน้า Login</Link>
+                </div>
             </div>
         </div>
     );
-}
+};
+
+export default RegisterPage;

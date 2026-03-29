@@ -1,8 +1,8 @@
-import mongoose from 'mongoose'
+const mongoose = require("mongoose");
 
 const paymentSchema = new mongoose.Schema({
-    bookingId: { type: mongoose.Schema.Types.ObjectId, ref: 'Booking', required: true },
-    customerId: { type: mongoose.Schema.Types.ObjectId, ref: 'Customer', required: true },
+    bookingId: { type: mongoose.Schema.Types.ObjectId, ref: "Booking", required: true },
+    customerId: { type: mongoose.Schema.Types.ObjectId, ref: "Customer", required: true },
     installment: { type: Number, required: true, enum: [1, 2] },
     amount: { type: Number, required: true },
     slipUrl: { type: String, required: true },
@@ -10,12 +10,12 @@ const paymentSchema = new mongoose.Schema({
     bankName: { type: String },
     status: {
         type: String,
-        enum: ['pending', 'approved', 'rejected'],
-        default: 'pending',
+        enum: ["pending", "approved", "rejected"],
+        default: "pending",
     },
-    verifiedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'Admin', default: null },
+    verifiedBy: { type: mongoose.Schema.Types.ObjectId, ref: "Admin", default: null },
     verifiedAt: { type: Date },
     rejectReason: { type: String },
-}, { timestamps: true })
+}, { timestamps: true });
 
-export default mongoose.model('Payment', paymentSchema)
+module.exports = mongoose.model("Payment", paymentSchema);
