@@ -2995,3 +2995,233 @@ body {
 .payment-form input[type="date"]::placeholder {
   color: var(--gray-400) !important;
 }
+
+/* ========================================
+   MY BOOKINGS - Detail modal theme
+   ======================================== */
+
+.booking-detail-modal__dialog {
+  max-width: 760px;
+}
+
+.booking-detail-modal__surface {
+  background: linear-gradient(145deg, #fff5fb 0%, #ffeef7 52%, #fff8f2 100%);
+  padding: 20px;
+}
+
+.booking-detail-modal__dialog .app-modal__title {
+  font-size: 42px;
+  line-height: 0.95;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+}
+
+.booking-detail-modal__body {
+  padding-bottom: 4px;
+}
+
+.booking-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.booking-detail__hero {
+  border-radius: 16px;
+  background: linear-gradient(135deg, #f06292 0%, #e91e8c 42%, #c2185b 100%);
+  color: white;
+  padding: 16px 18px;
+  box-shadow: 0 10px 30px rgba(194, 24, 91, 0.26);
+}
+
+.booking-detail__hero-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.booking-detail__eyebrow {
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.booking-detail__code {
+  margin-top: 4px;
+  font-size: 22px;
+  font-weight: 900;
+  letter-spacing: 0.01em;
+}
+
+.booking-detail__status-pill {
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  border: 1px solid rgba(255, 255, 255, 0.32);
+  background: rgba(255, 255, 255, 0.18);
+  color: white;
+  white-space: nowrap;
+}
+
+.booking-detail__venue {
+  margin-top: 10px;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.booking-detail__meta-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.booking-detail__meta-item {
+  background: white;
+  border: 1px solid #f5d6e7;
+  border-radius: 14px;
+  padding: 12px 14px;
+}
+
+.booking-detail__meta-label {
+  font-size: 12px;
+  color: var(--gray-400);
+  margin-bottom: 4px;
+}
+
+.booking-detail__meta-value {
+  font-size: 15px;
+  color: var(--gray-900);
+  font-weight: 700;
+}
+
+.booking-detail__section {
+  border-radius: 14px;
+  border: 1px solid #f5d6e7;
+  background: white;
+  padding: 14px;
+}
+
+.booking-detail__section-title {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--gray-400);
+  margin-bottom: 10px;
+  font-weight: 700;
+}
+
+.booking-detail__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.booking-detail__chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: #fff0f6;
+  border: 1px solid #f9d1e2;
+  color: #be185d;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.booking-detail__empty {
+  color: var(--gray-500);
+  font-size: 14px;
+}
+
+.booking-detail__payment-block {
+  border-radius: 14px;
+  background: linear-gradient(135deg, #fff1f7 0%, #fff6eb 100%);
+  border: 1px solid #f7d3df;
+  padding: 14px;
+}
+
+.booking-detail__payment-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.booking-detail__payment-card {
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.88);
+  border: 1px solid #f5d6e7;
+  padding: 10px;
+}
+
+.booking-detail__payment-label {
+  font-size: 11px;
+  color: var(--gray-500);
+}
+
+.booking-detail__payment-value {
+  margin-top: 6px;
+  font-size: 18px;
+  font-weight: 900;
+  color: var(--gray-900);
+  line-height: 1.1;
+}
+
+.booking-detail__payment-value--pink {
+  color: #be185d;
+}
+
+.booking-detail__payment-value--amber {
+  color: #b45309;
+}
+
+@media (max-width: 900px) {
+  .booking-detail-modal__dialog .app-modal__title {
+    font-size: 34px;
+  }
+}
+
+@media (max-width: 700px) {
+  .booking-detail-modal__dialog {
+    max-width: 94vw;
+  }
+
+  .booking-detail-modal__surface {
+    padding: 16px;
+  }
+
+  .booking-detail-modal__dialog .app-modal__title {
+    font-size: 28px;
+    line-height: 1;
+  }
+
+  .booking-detail__hero-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .booking-detail__meta-grid,
+  .booking-detail__payment-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.my-bookings__detail-btn {
+  padding: 8px 12px !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  border-radius: 999px !important;
+  border: 1px solid #f7bcd5 !important;
+  background: linear-gradient(135deg, #fff1f7, #ffe8f2) !important;
+  color: #be185d !important;
+  box-shadow: 0 2px 8px rgba(190, 24, 93, 0.12) !important;
+}
+
+.my-bookings__detail-btn:hover:not(:disabled) {
+  transform: translateY(-1px) !important;
+  border-color: #f06292 !important;
+  background: linear-gradient(135deg, #ffe4ef, #ffd9ea) !important;
+  color: #9d174d !important;
+}
