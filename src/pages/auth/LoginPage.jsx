@@ -23,7 +23,8 @@ const LoginPage = () => {
       setAuth(data.user, data.token, role);
       if (role === 'admin') navigate('/admin/dashboard');
       else if (role === 'customer') navigate('/search');
-      else navigate('/orders');
+      else if (role === 'provider') navigate('/orders');
+      else navigate('/');
     } catch (err) {
       setError(err.response?.data?.message || 'อีเมลหรือรหัสผ่านไม่ถูกต้อง');
     } finally {
@@ -32,8 +33,8 @@ const LoginPage = () => {
   };
 
   const roles = [
-    { value: 'customer', label: '👫 ลูกค้า' },
-    { value: 'provider', label: '🎵 ผู้ให้บริการ' },
+    { value: 'customer', label: '👫 Customer' },
+    { value: 'provider', label: '🎵 Provider' },
     { value: 'admin', label: '⚙️ Admin' },
   ];
 

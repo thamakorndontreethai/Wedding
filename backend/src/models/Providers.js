@@ -8,6 +8,7 @@ const providerSchema = new mongoose.Schema({
     password: { type: String, required: true, minlength: 6 },
     phone: { type: String },
     serviceType: { type: String, required: true, enum: ["food", "music", "photo"] },
+    price: { type: Number, default: 500, min: 0 },
     maxGuests: { type: Number, default: 0 },
     bankName: { type: String },
     bankAccount: { type: String },

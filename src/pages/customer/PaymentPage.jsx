@@ -11,6 +11,7 @@ const PaymentPage = () => {
   const [selectedFile, setSelectedFile] = useState(null);
   const [previewUrl, setPreviewUrl] = useState('');
   const [message, setMessage] = useState('');
+  const [messageType, setMessageType] = useState(''); // 'success' or 'error'
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
 
   useEffect(() => () => {
@@ -25,6 +26,7 @@ const PaymentPage = () => {
 
     if (!file.type.startsWith('image/')) {
       setMessage('กรุณาเลือกไฟล์รูปภาพเท่านั้น');
+      setMessageType('error');
       setSelectedFile(null);
       if (previewUrl) URL.revokeObjectURL(previewUrl);
       setPreviewUrl('');
@@ -49,6 +51,7 @@ const PaymentPage = () => {
 
     if (!amount || !transferDate || !selectedFile) {
       setMessage('กรุณากรอกข้อมูลให้ครบและแนบหลักฐานการโอน');
+      setMessageType('error');
       return;
     }
 
@@ -70,60 +73,113 @@ const PaymentPage = () => {
       setTransferDate('');
       setSelectedFile(null);
       setMessage('ส่งหลักฐานสำเร็จแล้ว สามารถไปที่หน้าตรวจสอบยอดเพื่อดูรูปได้');
+      setMessageType('success');
     } catch (error) {
       setMessage(error.message || 'ส่งหลักฐานไม่สำเร็จ');
+      setMessageType('error');
     }
   };
 
   return (
-    <div className="max-w-md mx-auto">
-      <h1 className="text-2xl font-bold mb-6">แจ้งชำระเงินมัดจำ</h1>
-      <form className="bg-white p-6 rounded-lg shadow-sm border" onSubmit={handleSubmit}>
-        <p className="mb-4 text-gray-600">กรุณาโอนเงินเข้าบัญชี: 123-4-56789-0 (ธ.กสิกรไทย)</p>
-        <Input
-          label="จำนวนเงิน (งวดที่ 1/2)"
-          type="number"
-          min={1}
-          value={amount}
-          onChange={(event) => setAmount(event.target.value)}
-          required
-        />
-        <Input
-          label="วันที่ชำระ"
-          type="date"
-          value={transferDate}
-          onChange={(event) => setTransferDate(event.target.value)}
-          required
-        />
-        <label className="block text-sm font-medium mb-1">แนบหลักฐาน (Slip)</label>
-        <input type="file" accept="image/*" className="mb-3 w-full" onChange={handleFileChange} />
+    <div className="payment-page">
+      {/* Hero Header */}
+      <section className="payment-hero">
+        <div className="payment-hero__content">
+          <h1 className="payment-hero__title">💳 แจ้งชำระเงินมัดจำ</h1>
+          <p className="payment-hero__desc">อัปโหลดสลิปการโอนเงินเพื่อให้การยืนยันการจองของคุณ</p>
+        </div>
+      </section>
 
-        {previewUrl && (
-          <div className="mb-4 space-y-2">
-            <img src={previewUrl} alt="พรีวิวหลักฐานการโอน" className="w-full rounded-md border border-gray-200" />
-            <button
-              type="button"
-              className="text-sm text-blue-600 hover:underline"
-              onClick={() => setIsPreviewOpen(true)}
-            >
-              ดูรูปขนาดใหญ่
-            </button>
+      {/* Form Container */}
+      <div className="payment-container">
+        <form className="payment-form" onSubmit={handleSubmit}>
+          {/* Bank info card */}
+          <div className="payment-info-box">
+            <p className="payment-info-box__label">🏦 กรุณาโอนเงินเข้าบัญชี</p>
+            <p className="payment-info-box__value">123-4-56789-0 (ธ.กสิกรไทย)</p>
           </div>
-        )}
 
-        {message && <p className="mb-3 text-sm text-gray-700">{message}</p>}
-        <Button variant="primary" type="submit">ส่งหลักฐาน</Button>
-      </form>
+          {/* Amount Input */}
+          <div className="form-section">
+            <h2 className="form-section__title">ข้อมูลระเบียง</h2>
+            <div className="payment-input-wrapper">
+              <Input
+                label="จำนวนเงิน (งวดที่ 1/2)"
+                type="number"
+                min={1}
+                value={amount}
+                onChange={(event) => setAmount(event.target.value)}
+                required
+              />
+            </div>
+            <div className="payment-input-wrapper">
+              <Input
+                label="วันที่ชำระ"
+                type="date"
+                value={transferDate}
+                onChange={(event) => setTransferDate(event.target.value)}
+                required
+              />
+            </div>
+          </div>
 
+          {/* File Upload */}
+          <div className="form-section">
+            <h2 className="form-section__title">📸 แนบหลักฐานการโอน</h2>
+            <label className="file-input-label">
+              <input 
+                type="file" 
+                accept="image/*" 
+                onChange={handleFileChange}
+                className="file-input"
+              />
+              <span className="file-input-text">
+                {selectedFile ? `✓ ${selectedFile.name}` : '+ เลือกรูปภาพ'}
+              </span>
+            </label>
+          </div>
+
+          {/* Image Preview */}
+          {previewUrl && (
+            <div className="preview-section">
+              <h3 className="preview-section__title">ตัวอย่างหลักฐาน</h3>
+              <img 
+                src={previewUrl} 
+                alt="พรีวิวหลักฐานการโอน" 
+                className="preview-image" 
+              />
+              <button
+                type="button"
+                className="preview-btn"
+                onClick={() => setIsPreviewOpen(true)}
+              >
+                ดูรูปขนาดใหญ่
+              </button>
+            </div>
+          )}
+
+          {/* Message */}
+          {message && (
+            <div className={`payment-message ${messageType === 'success' ? 'payment-message--success' : 'payment-message--error'}`}>
+              {messageType === 'success' ? '✓' : '⚠️'} {message}
+            </div>
+          )}
+
+          {/* Submit Button */}
+          <Button variant="primary" type="submit">ส่งหลักฐาน</Button>
+        </form>
+      </div>
+
+      {/* Preview Modal */}
       <Modal
         isOpen={isPreviewOpen}
         onClose={() => setIsPreviewOpen(false)}
         title="ตัวอย่างหลักฐานที่กำลังจะส่ง"
       >
         {previewUrl ? (
-          <img src={previewUrl} alt="ตัวอย่างหลักฐาน" className="w-full rounded-md border border-gray-200" />
+          <img src={previewUrl} alt="ตัวอย่างหลักฐาน" className="preview-image" />
         ) : (
-          <p className="text-sm text-gray-500">ไม่มีรูปสำหรับแสดง</p>
+          <p style={{ color: 'var(--gray-400)', textAlign: 'center', padding: '20px' }}>ไม่มีรูปสำหรับแสดง</p>
         )}
       </Modal>
     </div>

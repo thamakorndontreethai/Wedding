@@ -83,21 +83,22 @@ const PackagesPage = () => {
   };
 
   return (
-    <div>
-      <div className="flex justify-between mb-4">
-        <h1 className="text-2xl font-bold">จัดการแพ็กเกจ</h1>
-        <Button variant="primary" onClick={openCreateModal}>+ เพิ่มแพ็กเกจ</Button>
+    <div className="admin-packages">
+      <div className="admin-packages__header">
+        <h1 className="page-header__title">จัดการแพ็กเกจ</h1>
+        <Button variant="primary" className="admin-packages__add-btn" onClick={openCreateModal}>+ เพิ่มแพ็กเกจ</Button>
       </div>
 
       <Table
+        variant="pink"
         headers={['ชื่อแพ็กเกจ', 'ราคา', 'แขกสูงสุด', 'จัดการ']}
         data={packages.map((pkg) => [
           pkg.name,
           `฿${pkg.price.toLocaleString('th-TH')}`,
           String(pkg.maxGuests),
-          <div className="flex flex-wrap gap-2">
-            <Button variant="secondary" onClick={() => openEditModal(pkg)}>แก้ไข</Button>
-            <Button variant="danger" onClick={() => handleDeletePackage(pkg.id)}>ลบ</Button>
+          <div className="admin-packages__actions">
+            <Button variant="secondary" className="admin-packages__edit-btn" onClick={() => openEditModal(pkg)}>แก้ไข</Button>
+            <Button variant="danger" className="admin-packages__delete-btn" onClick={() => handleDeletePackage(pkg.id)}>ลบ</Button>
           </div>,
         ])}
       />
@@ -107,7 +108,7 @@ const PackagesPage = () => {
         onClose={closeModal}
         title={isEditing ? 'แก้ไขแพ็กเกจ' : 'เพิ่มแพ็กเกจ'}
       >
-        <form onSubmit={handleSubmit}>
+        <form className="admin-packages__form" onSubmit={handleSubmit}>
           <Input
             label="ชื่อแพ็กเกจ"
             value={form.name}
@@ -130,11 +131,11 @@ const PackagesPage = () => {
             onChange={updateForm('maxGuests')}
             required
           />
-          <div className="flex justify-end gap-2">
-            <Button variant="secondary" onClick={closeModal}>
+          <div className="admin-packages__form-actions">
+            <Button variant="secondary" className="admin-packages__cancel-btn" onClick={closeModal}>
               ยกเลิก
             </Button>
-            <Button variant="primary" type="submit">
+            <Button variant="primary" className="admin-packages__save-btn" type="submit">
               บันทึก
             </Button>
           </div>

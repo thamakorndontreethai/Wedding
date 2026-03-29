@@ -3,6 +3,12 @@ import { useNavigate, Link } from 'react-router-dom';
 import api from '../../services/api';
 import { useAuthStore } from '../../store/authStore';
 
+const SERVICE_TYPE_OPTIONS = [
+    { value: 'food', label: '🍽️ อาหาร' },
+    { value: 'photo', label: '📷 ช่างภาพ' },
+    { value: 'music', label: '🎵 วงดนตรี' },
+];
+
 const RegisterPage = () => {
     const navigate = useNavigate();
     const { setAuth } = useAuthStore(); // ✅ ย้ายมาอยู่ในนี้
@@ -11,8 +17,22 @@ const RegisterPage = () => {
     const [loading, setLoading] = useState(false);
     const [formData, setFormData] = useState({
         firstName: '', lastName: '', phone: '', email: '', password: '',
-        serviceType: 'food',
+        serviceType: '',
     });
+
+    const getFriendlyError = (err) => {
+        const rawMessage = err.response?.data?.message || '';
+
+        if (rawMessage.includes('E11000') || rawMessage.includes('duplicate key')) {
+            return 'อีเมลนี้ถูกใช้งานแล้ว';
+        }
+
+        if (rawMessage.includes('ValidationError')) {
+            return 'ข้อมูลไม่ถูกต้อง กรุณาตรวจสอบอีกครั้ง';
+        }
+
+        return rawMessage || 'สมัครสมาชิกไม่สำเร็จ';
+    };
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -27,6 +47,12 @@ const RegisterPage = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
+
+        if (role === 'provider' && !formData.serviceType) {
+            setError('กรุณาเลือกประเภทผู้ให้บริการ (อาหาร / ช่างภาพ / วงดนตรี)');
+            return;
+        }
+
         setLoading(true);
         try {
             const endpoint = role === 'customer'
@@ -46,9 +72,10 @@ const RegisterPage = () => {
 
             const { data } = await api.post(endpoint, payload);
             setAuth(data.user, data.token, role);
-            navigate(role === 'customer' ? '/search' : '/provider/dashboard');
+            if (role === 'customer') navigate('/search');
+            else navigate('/orders');
         } catch (err) {
-            setError(err.response?.data?.message || 'สมัครสมาชิกไม่สำเร็จ');
+            setError(getFriendlyError(err));
         } finally {
             setLoading(false);
         }
@@ -132,19 +159,44 @@ const RegisterPage = () => {
                         {role === 'provider' && (
                             <div className="input-group">
                                 <label className="input-label">ประเภทบริการ</label>
-                                <select className="auth-input" name="serviceType"
-                                    value={formData.serviceType} onChange={handleChange}
-                                    style={{ paddingLeft: '16px' }}>
-                                    <option value="food">🍽️ อาหาร</option>
-                                    <option value="music">🎵 วงดนตรี</option>
-                                    <option value="photo">📷 ช่างภาพ</option>
-                                </select>
+                                <p style={{ fontSize: 12, color: 'var(--gray-500)', marginBottom: 8 }}>
+                                    กรุณาเลือกประเภทบัญชีก่อนสมัคร
+                                </p>
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10 }}>
+                                    {SERVICE_TYPE_OPTIONS.map((service) => {
+                                        const selected = formData.serviceType === service.value;
+                                        return (
+                                            <button
+                                                key={service.value}
+                                                type="button"
+                                                onClick={() => setFormData(prev => ({ ...prev, serviceType: service.value }))}
+                                                style={{
+                                                    border: `2px solid ${selected ? 'var(--pink)' : 'var(--gray-100)'}`,
+                                                    background: selected ? 'var(--pink-bg)' : 'white',
+                                                    color: selected ? 'var(--pink)' : 'var(--gray-600)',
+                                                    borderRadius: 12,
+                                                    padding: '10px 8px',
+                                                    fontSize: 13,
+                                                    fontWeight: 700,
+                                                    cursor: 'pointer',
+                                                    transition: 'all 0.2s ease',
+                                                }}
+                                            >
+                                                {service.label}
+                                            </button>
+                                        );
+                                    })}
+                                </div>
                             </div>
                         )}
 
                         {error && <div className="auth-error">⚠️ {error}</div>}
 
-                        <button className="auth-btn auth-btn-primary" type="submit" disabled={loading}>
+                        <button
+                            className="auth-btn auth-btn-primary"
+                            type="submit"
+                            disabled={loading || (role === 'provider' && !formData.serviceType)}
+                        >
                             {loading ? 'กำลังสมัคร...' : 'ยืนยันการสมัคร'}
                         </button>
 

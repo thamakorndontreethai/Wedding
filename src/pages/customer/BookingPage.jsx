@@ -2,6 +2,45 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import api from '../../services/api';
 
+const MOCK_VENUES = [
+  {
+    _id: 'mock-venue-001',
+    name: 'Grand Blossom Hall',
+    description: 'ห้องจัดเลี้ยงสไตล์หรู พร้อมเวที แสง สี เสียงครบ เหมาะกับงานแต่งขนาดใหญ่',
+    guestCount: 350,
+    province: 'ชลบุรี',
+    pricePerSession: 180000,
+    images: ['https://picsum.photos/seed/wedding-grand-ballroom/1200/800'],
+  },
+  {
+    _id: 'mock-venue-002',
+    name: 'Garden Romance Venue',
+    description: 'สถานที่จัดงานกลางสวน บรรยากาศอบอุ่น เหมาะกับพิธีช่วงเย็นและงานเลี้ยงเล็กถึงกลาง',
+    guestCount: 180,
+    province: 'กรุงเทพมหานคร',
+    pricePerSession: 95000,
+    images: ['https://picsum.photos/seed/wedding-garden-venue/1200/800'],
+  },
+  {
+    _id: 'mock-venue-003',
+    name: 'Sea Breeze Wedding Space',
+    description: 'โลเคชันริมทะเล วิวพระอาทิตย์ตก เหมาะกับงานแต่งแนวโมเดิร์นและงาน after party',
+    guestCount: 250,
+    province: 'ระยอง',
+    pricePerSession: 140000,
+    images: ['https://picsum.photos/seed/wedding-seaside-venue/1200/800'],
+  },
+  {
+    _id: 'mock-venue-004',
+    name: 'Classic Ivory Ballroom',
+    description: 'บอลรูมโทนคลาสสิกเพดานสูง รองรับทีมช่างภาพและงานพิธีการเต็มรูปแบบ',
+    guestCount: 420,
+    province: 'นนทบุรี',
+    pricePerSession: 220000,
+    images: ['https://picsum.photos/seed/wedding-classic-hall/1200/800'],
+  },
+];
+
 const MEAL_OPTIONS = [
   { id: 'buffet', icon: '🍽️', title: 'บุฟเฟต์', desc: 'อาหารบุฟเฟต์หลากหลาย เลือกได้ตามใจ', pricePerHead: 450 },
   { id: 'chinese', icon: '🥢', title: 'โต๊ะจีน', desc: 'อาหารจีนมงคล เสิร์ฟครบ 10 คอร์ส', pricePerHead: 600 },
@@ -19,7 +58,13 @@ const FIXED_ADDONS = [
 ];
 
 // Component เลือก Provider
-const ProviderSelector = ({ title, icon, providers, selected, onSelect }) => (
+const SERVICE_ROLE_LABELS = {
+  food: 'บัญชีอาหาร',
+  photo: 'บัญชีช่างภาพ',
+  music: 'บัญชีวงดนตรี',
+};
+
+const ProviderSelector = ({ title, icon, providers, selected, onSelect, serviceType }) => (
   <div className="form-section">
     <h2 className="form-section__title">{icon} {title}</h2>
 
@@ -37,14 +82,20 @@ const ProviderSelector = ({ title, icon, providers, selected, onSelect }) => (
         {/* ไม่เลือก */}
         <div onClick={() => onSelect(null)}
           style={{
-            padding: 16, borderRadius: 14, cursor: 'pointer', transition: 'all 0.2s',
+            padding: 20, borderRadius: 16, cursor: 'pointer', transition: 'all 0.2s',
             border: `2px solid ${!selected ? 'var(--pink)' : 'var(--gray-100)'}`,
             background: !selected ? 'var(--pink-bg)' : 'white',
-            display: 'flex', alignItems: 'center', gap: 12,
+            display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 6,
           }}>
-          <div style={{ fontSize: 28 }}>🚫</div>
-          <div style={{ fontWeight: 600, fontSize: 14, color: !selected ? 'var(--pink)' : 'var(--gray-400)' }}>
+          <div style={{ fontSize: 32, marginBottom: 4 }}>🚫</div>
+          <div style={{ fontWeight: 700, fontSize: 15, color: !selected ? 'var(--pink)' : 'var(--gray-900)' }}>
             ไม่เลือก{title}
+          </div>
+          <div style={{ fontSize: 12, color: 'var(--gray-400)', lineHeight: 1.4 }}>
+            ข้ามการเลือกผู้ให้บริการประเภทนี้
+          </div>
+          <div style={{ fontWeight: 700, color: 'var(--pink)', fontSize: 14, marginTop: 2 }}>
+            +฿0
           </div>
         </div>
 
@@ -52,7 +103,7 @@ const ProviderSelector = ({ title, icon, providers, selected, onSelect }) => (
         {providers.map(p => (
           <div key={p._id} onClick={() => onSelect(p)}
             style={{
-              padding: 16, borderRadius: 14, cursor: 'pointer', transition: 'all 0.2s',
+              padding: 20, borderRadius: 16, cursor: 'pointer', transition: 'all 0.2s',
               border: `2px solid ${selected?._id === p._id ? 'var(--pink)' : 'var(--gray-100)'}`,
               background: selected?._id === p._id ? 'var(--pink-bg)' : 'white',
               position: 'relative',
@@ -71,27 +122,33 @@ const ProviderSelector = ({ title, icon, providers, selected, onSelect }) => (
 
             {/* Avatar */}
             <div style={{
-              width: 44, height: 44, borderRadius: '50%',
+              width: 48, height: 48, borderRadius: '50%',
               background: 'linear-gradient(135deg, var(--pink-light), var(--pink))',
               color: 'white', display: 'flex', alignItems: 'center',
               justifyContent: 'center', fontWeight: 800, fontSize: 18,
-              marginBottom: 10,
+              marginBottom: 8,
             }}>
               {p.firstName?.charAt(0).toUpperCase()}
             </div>
 
-            <div style={{ fontWeight: 700, fontSize: 14, color: selected?._id === p._id ? 'var(--pink)' : 'var(--gray-900)', marginBottom: 2 }}>
+            <div style={{ fontWeight: 700, fontSize: 15, color: selected?._id === p._id ? 'var(--pink)' : 'var(--gray-900)', marginBottom: 3 }}>
               {p.firstName} {p.lastName}
             </div>
-            <div style={{ fontSize: 12, color: 'var(--gray-400)', marginBottom: 4 }}>
+            <div style={{ fontSize: 11, color: 'var(--pink)', marginBottom: 4, fontWeight: 700 }}>
+              🏷️ {SERVICE_ROLE_LABELS[p.serviceType] || SERVICE_ROLE_LABELS[serviceType] || 'บัญชีผู้ให้บริการ'}
+            </div>
+            <div style={{ fontSize: 12, color: 'var(--gray-400)', marginBottom: 6 }}>
               📞 {p.phone || '-'}
             </div>
             {p.maxGuests > 0 && (
-              <div style={{ fontSize: 12, color: 'var(--gray-400)', marginBottom: 6 }}>
+              <div style={{ fontSize: 12, color: 'var(--gray-500)', marginBottom: 8, fontWeight: 600 }}>
                 👥 รับได้สูงสุด {p.maxGuests} คน
               </div>
             )}
-            <div style={{ fontWeight: 800, color: 'var(--pink)', fontSize: 15 }}>
+            <div style={{ fontWeight: 700, color: 'var(--pink)', fontSize: 14 }}>
+              ค่าบริการ
+            </div>
+            <div style={{ fontWeight: 800, color: 'var(--pink)', fontSize: 15, marginTop: 2 }}>
               +฿{(p.price || 0).toLocaleString()}
             </div>
           </div>
@@ -110,27 +167,65 @@ const BookingPage = () => {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
 
+  const [foodProviders, setFoodProviders] = useState([]);
   const [photoProviders, setPhotoProviders] = useState([]);
   const [musicProviders, setMusicProviders] = useState([]);
 
   const [mealType, setMealType] = useState('buffet');
-  const [guestCount, setGuestCount] = useState(100);
+  const [guestCount, setGuestCount] = useState(1);
   const [eventDate, setEventDate] = useState('');
   const [addons, setAddons] = useState([]);
   const [notes, setNotes] = useState('');
+  const [selectedFood, setSelectedFood] = useState(null);
   const [selectedPhoto, setSelectedPhoto] = useState(null);
   const [selectedMusic, setSelectedMusic] = useState(null);
 
+  const toNumber = (value) => {
+    const n = Number(value);
+    return Number.isFinite(n) ? n : 0;
+  };
+
+  const getVenueGuestCount = (venueData) => {
+    const fallbackCapacity = Math.max(toNumber(venueData?.capacityBuffet), toNumber(venueData?.capacityChinese));
+    return toNumber(venueData?.guestCount) || toNumber(venueData?.capacity) || fallbackCapacity;
+  };
+
   useEffect(() => {
     if (!venueId) return;
-    Promise.all([
+    Promise.allSettled([
       api.get(`/venues/${venueId}`),
+      api.get('/providers?serviceType=food'),
       api.get('/providers?serviceType=photo'),
       api.get('/providers?serviceType=music'),
-    ]).then(([venueRes, photoRes, musicRes]) => {
-      setVenue(venueRes.data);
-      setPhotoProviders(photoRes.data);
-      setMusicProviders(musicRes.data);
+    ]).then(([venueRes, foodRes, photoRes, musicRes]) => {
+      let resolvedVenue = null;
+
+      if (venueRes.status === 'fulfilled' && venueRes.value?.data) {
+        resolvedVenue = venueRes.value.data;
+      } else {
+        const mockVenue = MOCK_VENUES.find((item) => item._id === venueId);
+        if (mockVenue) {
+          resolvedVenue = mockVenue;
+        }
+      }
+
+      if (resolvedVenue) {
+        setVenue(resolvedVenue);
+        const defaultGuestCount = getVenueGuestCount(resolvedVenue);
+        setGuestCount(defaultGuestCount > 0 ? defaultGuestCount : 1);
+      }
+
+      if (foodRes.status === 'fulfilled') {
+        setFoodProviders(Array.isArray(foodRes.value?.data) ? foodRes.value.data : []);
+      }
+
+      if (photoRes.status === 'fulfilled') {
+        setPhotoProviders(Array.isArray(photoRes.value?.data) ? photoRes.value.data : []);
+      }
+
+      if (musicRes.status === 'fulfilled') {
+        setMusicProviders(Array.isArray(musicRes.value?.data) ? musicRes.value.data : []);
+      }
     }).catch(console.error)
       .finally(() => setLoading(false));
   }, [venueId]);
@@ -142,24 +237,37 @@ const BookingPage = () => {
   const mealPrice = (selectedMeal?.pricePerHead || 0) * guestCount;
   const venuePrice = venue?.pricePerSession || 0;
   const addonPrice = FIXED_ADDONS.filter(a => addons.includes(a.id)).reduce((s, a) => s + a.price, 0);
+  const foodPrice = selectedFood?.price || 0;
   const photoPrice = selectedPhoto?.price || 0;
   const musicPrice = selectedMusic?.price || 0;
-  const totalPrice = venuePrice + mealPrice + addonPrice + photoPrice + musicPrice;
+  const totalPrice = venuePrice + mealPrice + addonPrice + foodPrice + photoPrice + musicPrice;
   const depositAmount = Math.round(totalPrice * 0.3);
+  const venueGuestCount = getVenueGuestCount(venue);
 
   const handleSubmit = async () => {
     if (!eventDate) return alert('กรุณาเลือกวันจัดงาน');
-    if (guestCount < 10) return alert('จำนวนแขกต้องมีอย่างน้อย 10 คน');
+    if (guestCount < 1) return alert('จำนวนแขกต้องมีอย่างน้อย 1 คน');
+    if (venueGuestCount > 0 && guestCount > venueGuestCount) {
+      return alert(`จำนวนแขกเกินความจุสถานที่ (รองรับสูงสุด ${venueGuestCount} คน)`);
+    }
     setSubmitting(true);
     try {
-      await api.post('/bookings', {
+      const resolvedVenueName = venue?.name || venue?.venueName || '';
+      if (resolvedVenueName) {
+        localStorage.setItem('lastBookedVenueName', resolvedVenueName);
+      }
+
+      const { data: createdBooking } = await api.post('/bookings', {
         venueId,
+        venueName: resolvedVenueName || null,
         packageId: venueId,
         eventDate,
         guestCount,
         mealType,
+        addFood: !!selectedFood,
         addPhoto: !!selectedPhoto,
         addMusic: !!selectedMusic,
+        foodProviderId: selectedFood?._id || null,
         photoProviderId: selectedPhoto?._id || null,
         musicProviderId: selectedMusic?._id || null,
         totalPrice,
@@ -167,6 +275,14 @@ const BookingPage = () => {
         remainingAmount: totalPrice - depositAmount,
         notes,
       });
+
+      if (createdBooking?._id && resolvedVenueName) {
+        const mapKey = 'bookingVenueNameMap';
+        const currentMap = JSON.parse(localStorage.getItem(mapKey) || '{}');
+        currentMap[createdBooking._id] = resolvedVenueName;
+        localStorage.setItem(mapKey, JSON.stringify(currentMap));
+      }
+
       alert('จองสำเร็จ! กรุณาชำระเงินมัดจำ');
       navigate('/my-bookings');
     } catch (err) {
@@ -190,9 +306,9 @@ const BookingPage = () => {
       <div className="booking-header">
         <div className="booking-header__icon">💍</div>
         <div>
-          <h1 className="booking-header__title">{venue?.name}</h1>
+          <h1 className="booking-header__title">{venue?.name || venue?.venueName || 'สถานที่จัดงาน'}</h1>
           <p className="booking-header__sub">
-            📍 {venue?.province} · บุฟเฟต์ {venue?.capacityBuffet} ท่าน / โต๊ะจีน {venue?.capacityChinese} ท่าน
+            📍 {venue?.province} · รองรับได้สูงสุด {venueGuestCount || '-'} ท่าน
           </p>
         </div>
       </div>
@@ -211,8 +327,31 @@ const BookingPage = () => {
           <div>
             <label className="form-label">จำนวนแขก (คน)</label>
             <input type="number" className="form-input"
-              value={guestCount} min={10}
-              onChange={e => setGuestCount(Number(e.target.value))} />
+              value={guestCount} min={1} max={venueGuestCount || undefined} step={1} inputMode="numeric"
+              onChange={e => {
+                const rawValue = e.target.value;
+                if (rawValue === '') {
+                  setGuestCount(1);
+                  return;
+                }
+
+                const digitsOnly = rawValue.replace(/\D/g, '');
+                if (!digitsOnly) {
+                  setGuestCount(1);
+                  return;
+                }
+
+                const nextValue = Number.parseInt(digitsOnly, 10);
+                if (nextValue < 1) {
+                  setGuestCount(1);
+                  return;
+                }
+                if (venueGuestCount > 0 && nextValue > venueGuestCount) {
+                  setGuestCount(venueGuestCount);
+                  return;
+                }
+                setGuestCount(nextValue);
+              }} />
           </div>
         </div>
       </div>
@@ -244,25 +383,27 @@ const BookingPage = () => {
         </div>
       </div>
 
-      {/* Step 3 - ช่างภาพจาก DB */}
+      {/* Step 4 - ช่างภาพจาก DB */}
       <ProviderSelector
         title="ช่างภาพ"
         icon="📸"
         providers={photoProviders}
         selected={selectedPhoto}
         onSelect={setSelectedPhoto}
+        serviceType="photo"
       />
 
-      {/* Step 4 - วงดนตรีจาก DB */}
+      {/* Step 5 - วงดนตรีจาก DB */}
       <ProviderSelector
         title="วงดนตรี"
         icon="🎵"
         providers={musicProviders}
         selected={selectedMusic}
         onSelect={setSelectedMusic}
+        serviceType="music"
       />
 
-      {/* Step 5 - บริการเสริม */}
+      {/* Step 6 - บริการเสริม */}
       <div className="form-section">
         <h2 className="form-section__title">✨ บริการเสริม</h2>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
@@ -301,7 +442,7 @@ const BookingPage = () => {
         </div>
       </div>
 
-      {/* Step 6 - หมายเหตุ */}
+      {/* Step 7 - หมายเหตุ */}
       <div className="form-section">
         <h2 className="form-section__title">📝 หมายเหตุเพิ่มเติม</h2>
         <textarea className="form-input" rows={3}
@@ -323,6 +464,12 @@ const BookingPage = () => {
           <span>🍽️ {selectedMeal?.title} × {guestCount} คน</span>
           <span>฿{mealPrice.toLocaleString()}</span>
         </div>
+        {selectedFood && (
+          <div className="price-summary__row">
+            <span>🍽️ {selectedFood.firstName} {selectedFood.lastName}</span>
+            <span>฿{(selectedFood.price || 0).toLocaleString()}</span>
+          </div>
+        )}
         {selectedPhoto && (
           <div className="price-summary__row">
             <span>📸 {selectedPhoto.firstName} {selectedPhoto.lastName}</span>

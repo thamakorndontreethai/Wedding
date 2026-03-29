@@ -4,6 +4,7 @@ const bookingSchema = new mongoose.Schema({
     customerId: { type: mongoose.Schema.Types.ObjectId, ref: "Customer", required: true },
     packageId: { type: mongoose.Schema.Types.ObjectId, ref: "Package", required: true },
     venueId: { type: mongoose.Schema.Types.ObjectId, ref: "Venue", required: true },
+    venueName: { type: String },
     eventDate: { type: Date, required: true, index: true },
     guestCount: { type: Number, required: true },
     mealType: { type: String, required: true, enum: ["buffet", "chinese"] },

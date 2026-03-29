@@ -1,29 +1,64 @@
 const Booking = require("../models/Booking");
-const Package = require("../models/Package");
 const Schedule = require("../models/Schedules");
+const mongoose = require("mongoose");
 
 // POST /api/bookings
 exports.createBooking = async (req, res) => {
     try {
-        const { packageId, venueId, weddingDate, guestCount, customServices } = req.body;
-        const pkg = await Package.findById(packageId);
-        if (!pkg) return res.status(404).json({ message: "Package not found" });
+        const {
+            packageId,
+            venueId,
+            venueName,
+            eventDate,
+            weddingDate,
+            guestCount,
+            mealType,
+            addFood,
+            addPhoto,
+            addMusic,
+            totalPrice,
+            depositAmount,
+            remainingAmount,
+            notes,
+            musicProviderId,
+            customServices,
+        } = req.body;
+
+        const normalizedPackageId = mongoose.Types.ObjectId.isValid(packageId)
+            ? packageId
+            : new mongoose.Types.ObjectId();
+        const normalizedVenueId = mongoose.Types.ObjectId.isValid(venueId)
+            ? venueId
+            : new mongoose.Types.ObjectId();
+        const normalizedEventDate = eventDate || weddingDate;
+
+        if (!normalizedEventDate) {
+            return res.status(400).json({ message: "eventDate is required" });
+        }
 
         const booking = await Booking.create({
             customerId: req.user.id,
-            packageId,
-            venueId,
-            weddingDate,
+            packageId: normalizedPackageId,
+            venueId: normalizedVenueId,
+            venueName,
+            eventDate: normalizedEventDate,
             guestCount,
-            customServices,
-            totalPrice: pkg.basePrice
+            mealType,
+            addFood: !!addFood,
+            addPhoto: !!addPhoto,
+            addMusic: !!addMusic,
+            totalPrice,
+            depositAmount,
+            remainingAmount,
+            notes,
         });
 
         // อัปเดต schedule ของ provider
-        if (customServices?.musicProviderId) {
+        const selectedMusicProviderId = musicProviderId || customServices?.musicProviderId;
+        if (selectedMusicProviderId) {
             await Schedule.findOneAndUpdate(
-                { providerId: customServices.musicProviderId },
-                { $push: { bookedDates: weddingDate } },
+                { providerId: selectedMusicProviderId },
+                { $push: { bookedDates: normalizedEventDate } },
                 { upsert: true }
             );
         }
@@ -38,7 +73,7 @@ exports.createBooking = async (req, res) => {
 exports.getMyBookings = async (req, res) => {
     try {
         const bookings = await Booking.find({ customerId: req.user.id })
-            .populate("packageId venueId");
+            .populate("venueId");
         res.json(bookings);
     } catch (err) {
         res.status(500).json({ message: err.message });

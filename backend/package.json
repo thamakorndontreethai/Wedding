@@ -3,6 +3,7 @@
     "version": "1.0.0",
     "scripts": {
         "dev": "nodemon src/server.js",
+        "dev:clean": "kill -9 $(lsof -ti:5000) 2>/dev/null || true; nodemon src/server.js",
         "start": "node src/server.js"
     },
     "dependencies": {

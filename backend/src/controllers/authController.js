@@ -1,6 +1,19 @@
 const jwt = require("jsonwebtoken");
-const Customer = require("../models/customers");
-const Provider = require("../models/providers");
+const Customer = require("../models/Customers");
+const Provider = require("../models/Providers");
+const Admin = require("../models/Admin");
+
+const formatRegisterError = (err) => {
+    if (err?.code === 11000 && err?.keyPattern?.email) {
+        return "อีเมลนี้ถูกใช้งานแล้ว";
+    }
+
+    if (err?.name === "ValidationError") {
+        return "ข้อมูลไม่ถูกต้อง กรุณาตรวจสอบอีกครั้ง";
+    }
+
+    return err?.message || "สมัครสมาชิกไม่สำเร็จ";
+};
 
 const generateToken = (id, role) =>
     jwt.sign(
@@ -16,7 +29,18 @@ exports.registerCustomer = async (req, res) => {
         const customer = await Customer.create({ username, email, password, phone });
         res.status(201).json({ token: generateToken(customer._id, "customer"), user: customer });
     } catch (err) {
-        res.status(400).json({ message: err.message });
+        res.status(400).json({ message: formatRegisterError(err) });
+    }
+};
+
+// POST /api/auth/register/admin
+exports.registerAdmin = async (req, res) => {
+    try {
+        const { username, email, password, phone } = req.body;
+        const admin = await Admin.create({ username, email, password, phone });
+        res.status(201).json({ token: generateToken(admin._id, "admin"), user: admin });
+    } catch (err) {
+        res.status(400).json({ message: formatRegisterError(err) });
     }
 };
 
@@ -27,7 +51,7 @@ exports.registerProvider = async (req, res) => {
         const provider = await Provider.create({ firstName, lastName, email, password, phone, serviceType });
         res.status(201).json({ token: generateToken(provider._id, "provider"), user: provider });
     } catch (err) {
-        res.status(400).json({ message: err.message });
+        res.status(400).json({ message: formatRegisterError(err) });
     }
 };
 
@@ -39,9 +63,11 @@ exports.login = async (req, res) => {
         let user;
 
         if (role === "customer")
-            user = await Customer.findOne({ email }); // ✅ เอา .select("+password") ออก
+            user = await Customer.findOne({ email });
         else if (role === "provider")
-            user = await Provider.findOne({ email }); // ✅ เอา .select("+password") ออก
+            user = await Provider.findOne({ email });
+        else if (role === "admin")
+            user = await Admin.findOne({ email });
         else
             return res.status(400).json({ message: "Invalid role" });
 

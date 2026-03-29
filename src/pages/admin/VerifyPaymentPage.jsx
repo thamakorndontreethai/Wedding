@@ -80,60 +80,61 @@ const VerifyPaymentPage = () => {
   const verifiedCount = payments.filter((payment) => payment.status === 'verified').length;
 
   return (
-    <div className="space-y-6">
+    <div className="verify-payment-page">
       <section className="im-hero">
         <div className="im-hero__grain" aria-hidden="true" />
         <div className="im-hero__content">
           <p className="im-hero__eyebrow">Admin Payment Review</p>
           <h1 className="im-hero__title">ตรวจสอบหลักฐานการชำระเงิน</h1>
           <p className="im-hero__desc">อัปเดตสถานะผ่าน dropdown และลบหลักฐานที่ไม่ต้องการได้ทันที</p>
-          <div className="mt-5 grid grid-cols-1 md:grid-cols-3 gap-3">
-            <div className="rounded-xl border border-stone-300/70 bg-white/75 p-4">
-              <p className="text-xs uppercase tracking-[0.14em] text-stone-500">ทั้งหมด</p>
-              <p className="text-3xl font-semibold text-stone-900">{payments.length}</p>
+          <div className="verify-summary">
+            <div className="verify-summary__card">
+              <p className="verify-summary__label">ทั้งหมด</p>
+              <p className="verify-summary__value">{payments.length}</p>
             </div>
-            <div className="rounded-xl border border-amber-300/70 bg-amber-50/70 p-4">
-              <p className="text-xs uppercase tracking-[0.14em] text-amber-700">Pending</p>
-              <p className="text-3xl font-semibold text-amber-800">{pendingCount}</p>
+            <div className="verify-summary__card verify-summary__card--pending">
+              <p className="verify-summary__label">Pending</p>
+              <p className="verify-summary__value verify-summary__value--pending">{pendingCount}</p>
             </div>
-            <div className="rounded-xl border border-emerald-300/70 bg-emerald-50/70 p-4">
-              <p className="text-xs uppercase tracking-[0.14em] text-emerald-700">Verified</p>
-              <p className="text-3xl font-semibold text-emerald-800">{verifiedCount}</p>
+            <div className="verify-summary__card verify-summary__card--verified">
+              <p className="verify-summary__label">Verified</p>
+              <p className="verify-summary__value verify-summary__value--verified">{verifiedCount}</p>
             </div>
           </div>
         </div>
       </section>
 
-      <div className="rounded-2xl border border-stone-300/70 bg-white/75 backdrop-blur-sm p-4 shadow-sm">
+      <div className="verify-table-wrap">
         <Table
+          variant="pink"
           headers={['ID', 'ชื่อลูกค้า', 'ยอดเงิน', 'สถานะ', 'จัดการ']}
           data={payments.map((p) => [
-            <span className="font-semibold text-stone-700">{p.id}</span>,
+            <span className="verify-id">{p.id}</span>,
             p.customer,
             `฿${typeof p.amount === 'number' ? p.amount.toLocaleString('th-TH') : p.amount}`,
-            <div className="relative w-[118px]">
+            <div className="verify-status-wrap">
               <select
                 value={p.status}
                 onChange={(event) => handleStatusChange(p.id, event.target.value)}
-                className={`w-full appearance-none rounded-xl border px-3 py-1.5 pr-9 text-sm font-medium shadow-sm transition-all focus:outline-none focus:ring-2 ${
+                className={`verify-status-select ${
                   p.status === 'verified'
-                    ? 'border-emerald-300/80 bg-emerald-50/80 text-emerald-800 focus:ring-emerald-200'
-                    : 'border-amber-300/80 bg-amber-50/80 text-amber-800 focus:ring-amber-200'
+                    ? 'verify-status-select--verified'
+                    : 'verify-status-select--pending'
                 }`}
               >
                 <option value="pending">Pending</option>
                 <option value="verified">Verified</option>
               </select>
-              <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-stone-500">
+              <span className="verify-status-wrap__icon" aria-hidden="true">
                 <svg width="14" height="14" viewBox="0 0 20 20" fill="none" aria-hidden="true">
                   <path d="M5 7.5L10 12.5L15 7.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               </span>
             </div>,
-            <div className="flex flex-wrap gap-2">
+            <div className="verify-actions">
               <button
                 type="button"
-                className="rounded-lg border border-sky-300/70 bg-sky-50 px-2.5 py-1 text-sky-700 hover:bg-sky-100 disabled:opacity-50"
+                className="verify-action-btn verify-action-btn--view"
                 onClick={() => handleViewSlip(p)}
                 disabled={!p.slipUrl}
               >
@@ -141,7 +142,7 @@ const VerifyPaymentPage = () => {
               </button>
               <button
                 type="button"
-                className="rounded-lg border border-rose-300/70 bg-rose-50 px-2.5 py-1 text-rose-700 hover:bg-rose-100"
+                className="verify-action-btn verify-action-btn--delete"
                 onClick={() => handleDeleteEvidence(p.id)}
               >
                 ลบหลักฐาน
@@ -157,23 +158,23 @@ const VerifyPaymentPage = () => {
         title={selectedSlip ? `หลักฐานการชำระเงิน ${selectedSlip.id}` : 'หลักฐานการชำระเงิน'}
       >
         {selectedSlip?.slipUrl ? (
-          <div className="space-y-3">
+          <div className="verify-modal-content">
             <img
               src={selectedSlip.slipUrl}
               alt={`หลักฐานการชำระเงิน ${selectedSlip.id}`}
-              className="w-full rounded-xl border border-stone-300/70"
+              className="verify-modal-content__image"
             />
             <a
               href={selectedSlip.slipUrl}
               target="_blank"
               rel="noreferrer"
-              className="inline-block text-sky-700 hover:underline"
+              className="verify-modal-content__link"
             >
               เปิดภาพเต็มขนาด
             </a>
           </div>
         ) : (
-          <p className="text-sm text-gray-500">ไม่พบหลักฐานการชำระเงิน</p>
+          <p className="verify-modal-content__empty">ไม่พบหลักฐานการชำระเงิน</p>
         )}
       </Modal>
     </div>

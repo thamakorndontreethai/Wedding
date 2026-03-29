@@ -2,11 +2,11 @@ import '../../index.css';
 const Badge = ({ status }) => {
   const normalized = String(status || '').toLowerCase();
   const styles = {
-    pending: 'bg-amber-50 text-amber-700 ring-amber-200',
-    verified: 'bg-emerald-50 text-emerald-700 ring-emerald-200',
-    approved: 'bg-emerald-50 text-emerald-700 ring-emerald-200',
-    rejected: 'bg-rose-50 text-rose-700 ring-rose-200',
-    processing: 'bg-sky-50 text-sky-700 ring-sky-200',
+    pending: 'badge-yellow',
+    verified: 'badge-green',
+    approved: 'badge-green',
+    rejected: 'badge-red',
+    processing: 'badge-blue',
   };
 
   const labels = {
@@ -18,9 +18,7 @@ const Badge = ({ status }) => {
   };
 
   return (
-    <span
-      className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ring-1 ring-inset ${styles[normalized] || 'bg-slate-100 text-slate-700 ring-slate-200'}`}
-    >
+    <span className={`badge ${styles[normalized] || 'badge-gray'}`}>
       {labels[normalized] || normalized || 'Unknown'}
     </span>
   );

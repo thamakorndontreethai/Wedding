@@ -1,15 +1,52 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Input from '../../components/ui/Input';
 import Button from '../../components/ui/Button';
 import api from '../../services/api';
 
+const MOCK_VENUES = [
+  {
+    _id: 'mock-venue-001',
+    name: 'Grand Blossom Hall',
+    description: 'ห้องจัดเลี้ยงสไตล์หรู พร้อมเวที แสง สี เสียงครบ เหมาะกับงานแต่งขนาดใหญ่',
+    guestCount: 350,
+    province: 'ชลบุรี',
+    pricePerSession: 180000,
+    images: ['https://picsum.photos/seed/wedding-grand-ballroom/1200/800'],
+  },
+  {
+    _id: 'mock-venue-002',
+    name: 'Garden Romance Venue',
+    description: 'สถานที่จัดงานกลางสวน บรรยากาศอบอุ่น เหมาะกับพิธีช่วงเย็นและงานเลี้ยงเล็กถึงกลาง',
+    guestCount: 180,
+    province: 'กรุงเทพมหานคร',
+    pricePerSession: 95000,
+    images: ['https://picsum.photos/seed/wedding-garden-venue/1200/800'],
+  },
+  {
+    _id: 'mock-venue-003',
+    name: 'Sea Breeze Wedding Space',
+    description: 'โลเคชันริมทะเล วิวพระอาทิตย์ตก เหมาะกับงานแต่งแนวโมเดิร์นและงาน after party',
+    guestCount: 250,
+    province: 'ระยอง',
+    pricePerSession: 140000,
+    images: ['https://picsum.photos/seed/wedding-seaside-venue/1200/800'],
+  },
+  {
+    _id: 'mock-venue-004',
+    name: 'Classic Ivory Ballroom',
+    description: 'บอลรูมโทนคลาสสิกเพดานสูง รองรับทีมช่างภาพและงานพิธีการเต็มรูปแบบ',
+    guestCount: 420,
+    province: 'นนทบุรี',
+    pricePerSession: 220000,
+    images: ['https://picsum.photos/seed/wedding-classic-hall/1200/800'],
+  },
+];
+
 const SearchPage = () => {
   const navigate = useNavigate();
   const [filter, setFilter] = useState({ guest: '', budget: '' });
   const [venues, setVenues] = useState([]);
-  const [results, setResults] = useState([]);
-  const [searched, setSearched] = useState(false);
   const [loading, setLoading] = useState(true);
 
   const sanitizeIntegerInput = (value) => {
@@ -22,9 +59,14 @@ const SearchPage = () => {
     const fetchVenues = async () => {
       try {
         const { data } = await api.get('/venues');
-        setVenues(data);
+        if (Array.isArray(data) && data.length > 0) {
+          setVenues(data);
+        } else {
+          setVenues(MOCK_VENUES);
+        }
       } catch (err) {
         console.error('โหลดสถานที่ไม่สำเร็จ:', err);
+        setVenues(MOCK_VENUES);
       } finally {
         setLoading(false);
       }
@@ -32,26 +74,43 @@ const SearchPage = () => {
     fetchVenues();
   }, []);
 
-  const handleSearch = async () => {
-    setLoading(true);
-    try {
-      const params = {};
-      if (filter.guest) params.guestCount = filter.guest;
-      if (filter.budget) params.budget = filter.budget;
-      const { data } = await api.get('/venues', { params });
-      setResults(data);
-      setSearched(true);
-    } catch (err) {
-      console.error('ค้นหาไม่สำเร็จ:', err);
-    } finally {
-      setLoading(false);
+  const toNumber = (value) => {
+    const n = Number(value);
+    return Number.isFinite(n) ? n : 0;
+  };
+
+  const getVenueGuestCount = (venue) => {
+    const fallbackCapacity = Math.max(toNumber(venue.capacityBuffet), toNumber(venue.capacityChinese));
+    return toNumber(venue.guestCount) || toNumber(venue.capacity) || fallbackCapacity;
+  };
+
+  const isFiltering = Boolean(filter.guest || filter.budget);
+
+  const displayVenues = useMemo(() => {
+    if (!isFiltering) return venues;
+
+    const guestRequired = filter.guest ? Number(filter.guest) : 0;
+    const budgetLimit = filter.budget ? Number(filter.budget) : 0;
+
+    return venues.filter((venue) => {
+      const venueGuestCount = getVenueGuestCount(venue);
+      const price = toNumber(venue.pricePerSession);
+
+      const guestMatch = guestRequired ? venueGuestCount >= guestRequired : true;
+      const budgetMatch = budgetLimit ? price <= budgetLimit : true;
+
+      return guestMatch && budgetMatch;
+    });
+  }, [venues, filter.guest, filter.budget, isFiltering]);
+
+  const handleSearch = () => {
+    if (!isFiltering) {
+      setFilter({ guest: '', budget: '' });
     }
   };
 
-  const displayVenues = searched ? results : venues;
-
   return (
-    <div className="space-y-8">
+    <div className="search-page">
 
       {/* Hero */}
       <section className="im-hero">
@@ -83,9 +142,9 @@ const SearchPage = () => {
       </section>
 
       {/* Result badge */}
-      {searched && (
+      {isFiltering && (
         <div className="search-result-badge">
-          พบสถานที่ <strong>{results.length} แห่ง</strong>
+          พบสถานที่ <strong>{displayVenues.length} แห่ง</strong>
           {filter.guest && ` · รับแขกอย่างน้อย ${filter.guest} ท่าน`}
           {filter.budget && ` · ราคาไม่เกิน ฿${Number(filter.budget).toLocaleString()}`}
         </div>
@@ -103,43 +162,50 @@ const SearchPage = () => {
 
       {/* Venue grid */}
       {!loading && (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 24 }}>
+        <div className="search-venue-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 24 }}>
           {displayVenues.map((venue) => (
-            <div key={venue._id} className="venue-card"
-              onClick={() => navigate(`/booking?venueId=${venue._id}`)}>
+            <div key={venue._id} className="venue-card" onClick={() => navigate(`/booking?venueId=${venue._id}`)}>
+              {(() => {
+                const venueGuestCount = getVenueGuestCount(venue);
 
-              <div className="venue-card__image">
-                {venue.images?.[0]
-                  ? <img src={venue.images[0]} alt={venue.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                  : '🏛️'}
-              </div>
+                return (
+                  <>
 
-              <div className="venue-card__body">
-                <h3 className="venue-card__title">{venue.name}</h3>
-                {venue.description && (
-                  <p className="venue-card__desc">{venue.description}</p>
-                )}
-                <div className="venue-card__meta">
-                  <div className="venue-card__meta-item">
-                    <span>👥</span>
-                    <span>บุฟเฟต์ {venue.capacityBuffet} ท่าน / โต๊ะจีน {venue.capacityChinese} ท่าน</span>
-                  </div>
-                  <div className="venue-card__meta-item">
-                    <span>📍</span>
-                    <span>{venue.province}</span>
-                  </div>
-                </div>
-                <div className="venue-card__price">
-                  ฿{venue.pricePerSession?.toLocaleString() ?? '-'}
-                </div>
-              </div>
+                    <div className="venue-card__image">
+                      {venue.images?.[0]
+                        ? <img src={venue.images[0]} alt={venue.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        : '🏛️'}
+                    </div>
+
+                    <div className="venue-card__body">
+                      <h3 className="venue-card__title">{venue.name}</h3>
+                      {venue.description && (
+                        <p className="venue-card__desc">{venue.description}</p>
+                      )}
+                      <div className="venue-card__meta">
+                        <div className="venue-card__meta-item">
+                          <span>👥</span>
+                          <span> รองรับได้สูงสุด {venueGuestCount || '-'} ท่าน</span>
+                        </div>
+                        <div className="venue-card__meta-item">
+                          <span>📍</span>
+                          <span>{venue.province}</span>
+                        </div>
+                      </div>
+                      <div className="venue-card__price">
+                        ฿{venue.pricePerSession?.toLocaleString() ?? '-'}
+                      </div>
+                    </div>
+                  </>
+                );
+              })()}
             </div>
           ))}
         </div>
       )}
 
       {/* Empty states */}
-      {!loading && searched && results.length === 0 && (
+      {!loading && isFiltering && displayVenues.length === 0 && (
         <div className="empty-state">
           <div className="empty-state__icon">🔍</div>
           <p className="empty-state__title">ไม่พบสถานที่ที่ตรงกับเงื่อนไข</p>
@@ -147,7 +213,7 @@ const SearchPage = () => {
         </div>
       )}
 
-      {!loading && !searched && venues.length === 0 && (
+      {!loading && !isFiltering && venues.length === 0 && (
         <div className="empty-state">
           <div className="empty-state__icon">🏛️</div>
           <p className="empty-state__title">ยังไม่มีสถานที่ในระบบ</p>
