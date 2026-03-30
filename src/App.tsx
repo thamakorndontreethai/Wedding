@@ -14,7 +14,9 @@ import SchedulePage from './pages/provider/SchedulePage';
 import ProviderProfilePage from './pages/provider/ProviderProfilePage';
 import ReportPage from './pages/provider/ReportPage';
 import DashboardPage from './pages/admin/DashboardPage';
+import AdminReportPage from './pages/admin/AdminReportPage';
 import PackagesPage from './pages/admin/PackagesPage';
+import ReceiptsPage from './pages/admin/ReceiptsPage';
 import VerifyPaymentPage from './pages/admin/VerifyPaymentPage';
 import './App.css';
 
@@ -94,10 +96,26 @@ function App() {
             }
           />
           <Route
+            path="/admin/report"
+            element={
+              <ProtectedRoute allowedRoles={['admin']}>
+                <AdminReportPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
             path="/admin/verify-payment"
             element={
               <ProtectedRoute allowedRoles={['admin']}>
                 <VerifyPaymentPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/receipts"
+            element={
+              <ProtectedRoute allowedRoles={['admin']}>
+                <ReceiptsPage />
               </ProtectedRoute>
             }
           />

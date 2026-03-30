@@ -66,6 +66,21 @@ const SERVICE_ROLE_LABELS = {
 
 const MEAL_TYPE_LABEL = { buffet: '🍽️ บุฟเฟต์', chinese: '🥢 โต๊ะจีน', both: '🍽️🥢 ทั้งสองแบบ' };
 
+const getIncludedServices = (pkg) => {
+  const services = [];
+  if (pkg?.includeFood) {
+    const foodLabel = pkg?.includeFoodType === 'chinese'
+      ? 'อาหาร (โต๊ะจีน)'
+      : pkg?.includeFoodType === 'buffet'
+        ? 'อาหาร (บุฟเฟต์)'
+        : 'อาหาร (โต๊ะจีน/บุฟเฟต์)';
+    services.push(foodLabel);
+  }
+  if (pkg?.includePhoto) services.push('ช่างภาพ');
+  if (pkg?.includeMusic) services.push('วงดนตรี');
+  return services;
+};
+
 const ProviderSelector = ({ title, icon, providers, selected, onSelect, serviceType, hasDate, mealTypeLabel }) => (
   <div className="form-section">
     <h2 className="form-section__title">{icon} {title}</h2>
@@ -327,7 +342,7 @@ const BookingPage = () => {
         packageId: selectedPackage?._id || null,
         eventDate,
         guestCount,
-        mealType: mealType || 'buffet',
+        mealType: selectedPackage?.includeFoodType === 'chinese' ? 'chinese' : (mealType || 'buffet'),
         addFood: !!selectedFood,
         addPhoto: !!selectedPhoto,
         addMusic: !!selectedMusic,
@@ -384,6 +399,9 @@ const BookingPage = () => {
             <div style={{ fontWeight: 800, color: '#be185d', marginBottom: 6 }}>{selectedPackage.name}</div>
             <div style={{ fontSize: 13, color: 'var(--gray-600)' }}>
               {selectedPackage.maxGuests > 0 ? `รองรับสูงสุด ${selectedPackage.maxGuests} คน` : 'ไม่จำกัดจำนวนแขก'}
+            </div>
+            <div style={{ fontSize: 13, color: 'var(--gray-600)', marginTop: 4 }}>
+              รวมบริการ: {getIncludedServices(selectedPackage).length > 0 ? getIncludedServices(selectedPackage).join(', ') : 'ไม่ระบุ'}
             </div>
             <div style={{ marginTop: 6, fontWeight: 700, color: 'var(--pink)' }}>
               ราคาแพ็กเกจ ฿{(selectedPackage.basePrice || 0).toLocaleString()}

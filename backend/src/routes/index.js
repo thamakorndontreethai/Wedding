@@ -23,6 +23,7 @@ const authController = require("../controllers/authController");
 const venueController = require("../controllers/venueComtroller");
 const bookingController = require("../controllers/bookingController");
 const paymentController = require("../controllers/paymentController");
+const receiptController = require("../controllers/receiptController");
 const providerController = require("../controllers/providerController");
 const packageController = require("../controllers/packageController");
 
@@ -68,5 +69,8 @@ router.post("/payments", auth(["customer"]), paymentController.uploadPayment);
 router.put("/payments/:id/approve", auth(["admin"]), paymentController.approvePayment);
 router.put("/payments/:id/reject", auth(["admin"]), paymentController.rejectPayment);  // ✅ เพิ่ม
 router.get("/payments", auth(["admin"]), paymentController.getAllPayments);
+
+// Receipts
+router.get("/receipts", auth(["admin"]), receiptController.getAllReceipts);
 
 module.exports = router;

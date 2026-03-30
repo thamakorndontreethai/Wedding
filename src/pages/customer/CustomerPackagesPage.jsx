@@ -4,6 +4,21 @@ import api from '../../services/api';
 
 const STORAGE_KEY = 'selectedPackage';
 
+const getIncludedServices = (pkg) => {
+  const services = [];
+  if (pkg?.includeFood) {
+    const foodLabel = pkg?.includeFoodType === 'chinese'
+      ? 'อาหาร (โต๊ะจีน)'
+      : pkg?.includeFoodType === 'buffet'
+        ? 'อาหาร (บุฟเฟต์)'
+        : 'อาหาร (โต๊ะจีน/บุฟเฟต์)';
+    services.push(foodLabel);
+  }
+  if (pkg?.includePhoto) services.push('ช่างภาพ');
+  if (pkg?.includeMusic) services.push('วงดนตรี');
+  return services;
+};
+
 const CustomerPackagesPage = () => {
   const navigate = useNavigate();
   const [packages, setPackages] = useState([]);
@@ -109,6 +124,9 @@ const CustomerPackagesPage = () => {
                 {pkg.description && (
                   <div style={{ marginTop: 6, fontSize: 13, color: 'var(--gray-500)' }}>{pkg.description}</div>
                 )}
+                <div style={{ marginTop: 8, fontSize: 12, color: 'var(--gray-600)', fontWeight: 600 }}>
+                  รวมบริการ: {getIncludedServices(pkg).length > 0 ? getIncludedServices(pkg).join(', ') : 'ไม่ระบุ'}
+                </div>
                 <div style={{ marginTop: 12, display: 'flex', justifyContent: 'space-between', fontSize: 13 }}>
                   <span style={{ color: 'var(--gray-500)' }}>
                     {pkg.maxGuests > 0 ? `รองรับ ${pkg.maxGuests} คน` : 'ไม่จำกัดจำนวนแขก'}

@@ -13,8 +13,18 @@ exports.getAllPackages = async (req, res) => {
 // POST /api/packages (Admin)
 exports.createPackage = async (req, res) => {
     try {
-        const { name, description, basePrice, maxGuests } = req.body;
-        const pkg = await Package.create({ name, description, basePrice, maxGuests });
+        const { name, description, basePrice, maxGuests, includeFood, includeFoodType, includeMusic, includePhoto } = req.body;
+        const normalizedFoodType = ["buffet", "chinese", "both"].includes(includeFoodType) ? includeFoodType : "both";
+        const pkg = await Package.create({
+            name,
+            description,
+            basePrice,
+            maxGuests,
+            includeFood: !!includeFood,
+            includeFoodType: !!includeFood ? normalizedFoodType : "both",
+            includeMusic: !!includeMusic,
+            includePhoto: !!includePhoto,
+        });
         res.status(201).json(pkg);
     } catch (err) {
         res.status(400).json({ message: err.message });
@@ -24,10 +34,20 @@ exports.createPackage = async (req, res) => {
 // PUT /api/packages/:id (Admin)
 exports.updatePackage = async (req, res) => {
     try {
-        const { name, description, basePrice, maxGuests } = req.body;
+        const { name, description, basePrice, maxGuests, includeFood, includeFoodType, includeMusic, includePhoto } = req.body;
+        const normalizedFoodType = ["buffet", "chinese", "both"].includes(includeFoodType) ? includeFoodType : "both";
         const pkg = await Package.findByIdAndUpdate(
             req.params.id,
-            { name, description, basePrice, maxGuests },
+            {
+                name,
+                description,
+                basePrice,
+                maxGuests,
+                includeFood: !!includeFood,
+                includeFoodType: !!includeFood ? normalizedFoodType : "both",
+                includeMusic: !!includeMusic,
+                includePhoto: !!includePhoto,
+            },
             { new: true, runValidators: true }
         );
         if (!pkg) return res.status(404).json({ message: "Package not found" });

@@ -53,9 +53,14 @@ const DashboardPage = () => {
       <div className="chart-card">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
           <h2 className="chart-card__title">รายการชำระเงินล่าสุด</h2>
-          <Link to="/admin/verify-payment" style={{ fontSize: 13, color: 'var(--pink)', fontWeight: 600 }}>
-            ดูทั้งหมด →
-          </Link>
+          <div style={{ display: 'flex', gap: 12 }}>
+            <Link to="/admin/report" style={{ fontSize: 13, color: '#2563eb', fontWeight: 600 }}>
+              ดูรายงาน →
+            </Link>
+            <Link to="/admin/verify-payment" style={{ fontSize: 13, color: 'var(--pink)', fontWeight: 600 }}>
+              ดูทั้งหมด →
+            </Link>
+          </div>
         </div>
         {loading ? (
           <div className="loading-state"><div className="loading-dots"><span /><span /><span /></div></div>

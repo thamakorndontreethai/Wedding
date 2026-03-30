@@ -7,6 +7,7 @@ const packageSchema = new mongoose.Schema({
     basePrice: { type: Number, required: true },
     maxGuests: { type: Number, default: 0 },
     includeFood: { type: Boolean, default: false },
+    includeFoodType: { type: String, enum: ["buffet", "chinese", "both"], default: "both" },
     includeMusic: { type: Boolean, default: false },
     includePhoto: { type: Boolean, default: false },
     addonFoodPrice: { type: Number, default: 0 },
